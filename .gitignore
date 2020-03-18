@@ -1,0 +1,10 @@
+# Binaries for programs and plugins
+bin
+debug
+dep
+obj
+src/glyphs.c
+src/glyphs.h
+
+# Idea IDE
+.idea/
