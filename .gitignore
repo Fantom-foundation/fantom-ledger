@@ -1,10 +1,13 @@
-# Binaries for programs and plugins
+# Temp objects 
 bin
 debug
 dep
 obj
+dev-env
 src/glyphs.c
 src/glyphs.h
 
-# Idea IDE
-.idea/
+# Rule out IDE-s
+.idea
+.vscode
+
