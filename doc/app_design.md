@@ -10,10 +10,11 @@ Each command consists of series of APDU messages where each single message uses 
 
 ### Request
 
-========================================================================
+
 | *Field*       | *CLA* | *INS* | *P1* | *P2* | *Lc* | *Data*   | *Le* |
-| *Size* (Byte) | 1     | 1     | 1    | 1    | 1    | variable | 1    |
-========================================================================
+|---------------|-------|-------|------|------|------|----------|-------
+| *Size* (Byte) |   1   |   1   |   1  |   1  |   1  | variable |   1  |
+
 
 Where:
     - *CLA* is APDU class number.
@@ -36,10 +37,9 @@ For the list of error messages, please refer to [src/errors.h](../src/errors.h).
 Generally the application responds by a data message with much simpler format.
 The structure is:
 
-============================================
 | *Field*       | *Data*   | *SW1* | *SW2* |
-| *Size* (Byte) | variable | 1     | 1     |
-============================================
+|---------------|----------|-------|--------
+| *Size* (Byte) | variable |   1   |   1   |
 
 Where:
     - *Data* is the response payload

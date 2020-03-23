@@ -7,26 +7,23 @@ The function is safe to call at any time.
 
 #### Input data
 
-=============================================
 | *CLA* | *INS* | *P1* | *p2* | *Lc* | *Le* |
-| 0xD7  | 0x01  | 0x00 | 0x00 | 0x00 | 0x00 |
-=============================================
+|-------|-------|------|------|------|------|
+|  0xD7 |  0x01 | 0x00 | 0x00 | 0x00 | 0x00 |
 
 #### Response
 
-================================================
 |Type: | *MINOR* | *MAJOR* | *PATCH* | *FLAGS* |
-|Size: | 1       | 1       | 1       | 1       |
-================================================
+|------|---------|---------|---------|---------|
+|Size: |    1    |    1    |    1    |    1    |
 
 Where tuple [MINOR, MAJOR, PATCH] represents 
 the application version. The FLAGS field contains
 cpecified configuration options.
 
-=================================================
 | Mask | Value | Meaning                        |
+|------|-------|--------------------------------|
 | 0x01 | 0x01  | Identifies development version |
-=================================================
 
 #### Application responsibility
 
