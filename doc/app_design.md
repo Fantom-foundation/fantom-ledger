@@ -3,7 +3,7 @@
 ## Communication Protocol
 Fantom Ledger application communicates with a client using APDU protocol.
 You can find details of the protocol on 
-[ISO 7816-4, Secrion 5](http://cardwerk.com/smart-card-standard-iso7816-4-section-5-basic-organizations/#chap5_4) 
+[ISO 7816-4, Section 5](http://cardwerk.com/smart-card-standard-iso7816-4-section-5-basic-organizations/#chap5_4) 
 document page. 
 
 Each command consists of series of APDU messages where each single message uses following format.
@@ -27,7 +27,7 @@ Where:
 Any unused fields *must* be set to zero by the sender. The application is responsible for verification 
 and validation of the incoming message and if an unused field contains any other value than zero, the
 application is responsible for raising en error even if the rest of the message could be processed. 
-The reason for this is to avoind unexpected behavior in case of protocol upgrade. Please see below.
+The reason for this is to avoid unexpected behavior in case of protocol upgrade. Please see below.
 
 For the list of error messages, please refer to [src/errors.h](../src/errors.h).
 

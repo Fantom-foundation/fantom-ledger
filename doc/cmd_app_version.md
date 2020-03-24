@@ -1,6 +1,6 @@
 ## Get Application Version
 
-This gets the version of the application running on Ledger. 
+This instruction returns the version of the application running on Ledger. 
 The function is safe to call at any time.
 
 ### Command Coding
@@ -9,9 +9,9 @@ The function is safe to call at any time.
 
 | *CLA* | *INS* | *P1* | *p2* | *Lc* | *Le* |
 |-------|-------|------|------|------|------|
-|  0xD7 |  0x01 | 0x00 | 0x00 | 0x00 | 0x00 |
-
-#### Response
+|  0xE0 |  0x01 | 0x00 | 0x00 | 0x00 | 0x04 |
+ 
+#### Response Payload
 
 |Type: | *MINOR* | *MAJOR* | *PATCH* | *FLAGS* |
 |------|---------|---------|---------|---------|
@@ -19,7 +19,7 @@ The function is safe to call at any time.
 
 Where tuple [MINOR, MAJOR, PATCH] represents 
 the application version. The FLAGS field contains
-cpecified configuration options.
+specified configuration options.
 
 | Mask | Value | Meaning                        |
 |------|-------|--------------------------------|
