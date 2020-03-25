@@ -8,7 +8,7 @@ being returned.
 
 #### Input data
 
-| *CLA* | *INS* | *P1* | *p2* |   *Lc*   |   *Le*   |
+| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |   *Le*   |
 |-------|-------|------|------|----------|----------|
 |  0xE0 |  0x11 | 0x01 | 0x00 | variable | variable |
 |  0xE0 |  0x11 | 0x02 | 0x00 | variable | variable |

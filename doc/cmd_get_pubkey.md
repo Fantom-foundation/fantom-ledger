@@ -7,7 +7,7 @@ display, nor returns, the address associated with the public key.
 
 #### Input data
 
-| *CLA* | *INS* | *P1* | *p2* |   *Lc*   |   *Le*   |
+| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |   *Le*   |
 |-------|-------|------|------|----------|----------|
 |  0xE0 |  0x10 | 0x00 | 0x00 | variable | variable |
 
