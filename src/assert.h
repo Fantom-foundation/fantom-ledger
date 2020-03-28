@@ -4,7 +4,7 @@
 // convenience redefinition of c keyword
 #define STATIC_ASSERT _Static_assert
 
-// the actual function we use for assertion
+// declare the actual function we use for assertion processing
 extern void assert(int cond, const char *msgStr);
 
 // substitutes function above, but it's more eye catching

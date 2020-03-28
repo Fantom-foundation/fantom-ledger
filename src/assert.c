@@ -15,19 +15,16 @@ void assert(
     // condition is met, nothing to do
     if (cond) return;
 
-#ifdef RESET_ON_CRASH
+    #ifdef RESET_ON_CRASH
     io_seproxyhal_se_reset();
-#else
+    #else
     {
-#ifdef DEVEL
+        #ifdef DEVEL
         {
-            PRINTF("Assertion failed %s\n", msgStr);
             ui_displayPaginatedText("Assertion failed", msgStr, NULL);
             THROW(ERR_ASSERT);
         }
-#else
-#			error "RESET_ON_CRASH should be enabled in non-devel mode!"
-#endif
+        #endif
     }
-#endif
+    #endif
 }
