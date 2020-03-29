@@ -132,6 +132,7 @@ unsigned char io_event(unsigned char channel MARK_UNUSED) {
         case SEPROXYHAL_TAG_TICKER_EVENT:
             UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
                     // the ticker is handled by a macro defined above
+                    // Disabled for Nano X due to new SDK ignoring this callback on UX_TICKER_EVENT.
                     HANDLE_UX_TICKER_EVENT(UX_ALLOWED);
             });
             break;

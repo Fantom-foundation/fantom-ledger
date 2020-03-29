@@ -13,12 +13,13 @@
 
 // internal declarations
 #include "conf.h"
-#include "handlers.h"
-#include "errors.h"
 #include "assert.h"
+#include "errors.h"
+#include "state.h"
+#include "handlers.h"
+#include "ux.h"
 #include "menu.h"
 #include "io.h"
-#include "main.h"
 
 // The app is designed for specific Ledger API level.
 STATIC_ASSERT(CX_APILEVEL >= API_LEVEL_MIN || CX_APILEVEL <= API_LEVEL_MAX, "bad api level");
