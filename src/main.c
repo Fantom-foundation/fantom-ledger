@@ -5,33 +5,41 @@
 * The software is distributed under MIT license. Please check the project
 * repository to obtain a copy of the license.
 ********************************************************************************/
-
+// system libs
 #include <stdint.h>
 #include <stdbool.h>
 #include <os_io_seproxyhal.h>
+#include <os.h>
 
 // internal declarations
+#include "conf.h"
+#include "handlers.h"
 #include "errors.h"
-#include "glyphs.h"
+#include "assert.h"
+#include "menu.h"
+#include "io.h"
 #include "main.h"
+
+// The app is designed for specific Ledger API level.
+STATIC_ASSERT(CX_APILEVEL >= API_LEVEL_MIN || CX_APILEVEL <= API_LEVEL_MAX, "bad api level");
 
 // ui_idle displays the main menu. Note that your app isn't required to use a
 // menu as its idle screen; you can define your own completely custom screen.
 void ui_idle(void) {
-    currentInstruction = INS_NONE;
-    // The first argument is the starting index within menu_main, and the last
-    // argument is a preprocessor; I've never seen an app that uses either
-    // argument.
-#if defined(TARGET_NANOS)
-    nanos_clear_timer();
-    UX_MENU_DISPLAY(0, menu_main, NULL);
-#elif defined(TARGET_NANOX)
+    // no instruction is being processed; the last one called idle
+    currentIns = INS_NONE;
+
+    // we support only Nano S and Nano X devices
+#if defined(TARGET_NANOS) || defined(TARGET_NANOX)
     // reserve a display stack slot if none yet
     if(G_ux.stack_count == 0) {
         ux_stack_push();
     }
+
+    // initiate the idle flow
     ux_flow_init(0, ux_idle_flow, NULL);
 #else
+    // unknown device?
     STATIC_ASSERT(false);
 #endif
 }
@@ -47,10 +55,8 @@ static void fantom_main(void) {
     // loop around and exchange APDU packets with the host
     // until EXCEPTION_IO_RESET is thrown.
     for (;;) {
-        // next response code
-        volatile unsigned short sw = 0;
-
-        // Ledger SDK implements extension to exceptions handling.
+        // Ledger SDK implements try/ catch system
+        // https://ledger.readthedocs.io/en/latest/userspace/syscalls.html
         // We need to handle all thrown exceptions and convert them into
         // APDU response codes. EXCEPTION_IO_RESET is re-thrown
         // and captured by the main function.
@@ -80,7 +86,7 @@ static void fantom_main(void) {
                 }
 
                 // make sure the device is ready to handle user input
-                // we don't allow processing on locked device, even for non-interactive instructions
+                // we don't process instructions on locked device, not even non-interactive
                 VALIDATE(device_is_unlocked(), ERR_DEVICE_LOCKED);
 
                 // read request header elements so we can validate the header
@@ -106,8 +112,8 @@ static void fantom_main(void) {
                 // get the payload pointer (data payload starts just after the header)
                 uint8_t *data = G_io_apdu_buffer + SIZEOF(*header);
 
-                // find the handler we will be using to process the incoming instruction
-                handler_fn_t *handlerFn = lookupHandler(header->ins);
+                // find the handler we will be using to process the incoming instruction (handlers.h)
+                handler_fn_t *handlerFn = getHandler(header->ins);
 
                 // validate that the instruction has been recognized and we do have a handler for it
                 VALIDATE(handlerFn != NULL, ERR_UNKNOWN_INS);
@@ -145,22 +151,34 @@ static void fantom_main(void) {
             }
             CATCH(EXCEPTION_IO_RESET)
             {
-                // re-throw the exception so we can capture
-                // it in the main function and terminate the app gracefully.
+                // re-throw the exception so we can capture it in the main function.
                 THROW(EXCEPTION_IO_RESET);
             }
             CATCH(ERR_ASSERT)
             {
-                // Reset device on assertion exception
-#ifdef RESET_ON_CRASH
+                // reset device on assertion exception
+                // this should be _enabled_ for production build
+                #ifdef RESET_ON_CRASH
                 io_seproxyhal_se_reset();
-#endif
+                #endif
             }
             CATCH_OTHER(e)
             {
-                // Convert the exception captured here to a response code
-                // sent in APDU. All error codes start with 0x6000; Success is 0x9000.
+                // Pass valid error codes to host and reset the state to idle.
                 // See errors.h for specific errors meaning.
+                if (e > _ERR_PASS_FROM && e < _ERR_PASS_TO) {
+                    // pass the error code
+                    io_send_buf(e, NULL, 0);
+
+                    // io_exchange on the start of the loop will block without sending response
+                    flags = IO_ASYNCH_REPLY;
+                    ui_idle();
+                } else {
+                    // unknown error happened; reset the device
+                    #ifdef RESET_ON_CRASH
+                    io_seproxyhal_se_reset();
+                    #endif
+                }
             }
         }
         END_TRY;
@@ -170,88 +188,6 @@ static void fantom_main(void) {
 // ---------------------------------------------
 // Everything below this point is Ledger magic.
 // ---------------------------------------------
-unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
-
-// io_seproxyhal_display overrides the display entry point; nothing more to do
-void io_seproxyhal_display(const bagl_element_t *element) {
-    io_seproxyhal_display_default((bagl_element_t *) element);
-}
-
-// io_event processes I/O event interrupt processing
-unsigned char io_event(unsigned char channel) {
-    // can't have more than one tag in the reply, not supported yet.
-    switch (G_io_seproxyhal_spi_buffer[0]) {
-        case SEPROXYHAL_TAG_FINGER_EVENT:
-            UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
-            break;
-
-        case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
-            UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
-            break;
-
-        case SEPROXYHAL_TAG_STATUS_EVENT:
-            if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
-                !(U4BE(G_io_seproxyhal_spi_buffer, 3) &
-                  SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
-                THROW(EXCEPTION_IO_RESET);
-            }
-            UX_DEFAULT_EVENT();
-            break;
-
-        case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
-            UX_DISPLAYED_EVENT({});
-            break;
-
-        case SEPROXYHAL_TAG_TICKER_EVENT:
-            UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
-#ifndef TARGET_NANOX
-                    if (UX_ALLOWED) {
-                        if (ux_step_count) {
-                            // prepare next screen
-                            ux_step = (ux_step + 1) % ux_step_count;
-                            // redisplay screen
-                            UX_REDISPLAY();
-                        }
-                    }
-#endif // TARGET_NANOX
-            });
-            break;
-
-        default:
-            UX_DEFAULT_EVENT();
-            break;
-    }
-
-    // close the event if not done previously (by a display or whatever)
-    if (!io_seproxyhal_spi_is_status_sent()) {
-        io_seproxyhal_general_status();
-    }
-
-    // command has been processed, DO NOT reset the current APDU transport
-    return 1;
-}
-
-// io_exchange_al processes I/O exchange
-unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
-    switch (channel & ~(IO_FLAGS)) {
-        case CHANNEL_KEYBOARD:
-            break;
-            // multiplexed io exchange over a SPI channel and TLV encapsulated protocol
-        case CHANNEL_SPI:
-            if (tx_len) {
-                io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
-                if (channel & IO_RESET_AFTER_REPLIED) {
-                    reset();
-                }
-                return 0; // nothing received from the master so far (it's a tx transaction)
-            } else {
-                return io_seproxyhal_spi_recv(G_io_apdu_buffer, sizeof(G_io_apdu_buffer), 0);
-            }
-        default:
-            THROW(INVALID_PARAMETER);
-    }
-    return 0;
-}
 
 // app_exit passes the termination intent to system
 static void app_exit(void) {
@@ -273,22 +209,27 @@ __attribute__((section(".boot"))) int main(void) {
     // exit critical section
     __asm volatile("cpsie i");
 
-    // ensure exception will work as planned
-    os_boot();
-
     for (;;) {
+        // ensure exception will work as planned
         UX_INIT();
+        os_boot();
 
+        // capture exceptions from main loop
         BEGIN_TRY
         {
             TRY
             {
                 io_seproxyhal_init();
 
+                #if defined(TARGET_NANOX)
+                // grab the current plane mode setting
+                G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
+                #endif
+
                 USB_power(0);
                 USB_power(1);
 
-                // render idle user interface
+                // setup idle user interface
                 ui_idle();
 
 #if defined(HAVE_BLE)
@@ -307,6 +248,12 @@ __attribute__((section(".boot"))) int main(void) {
             }
             CATCH_ALL
             {
+                // Maybe we should terminate the TRY / CATCH macro first to be clean?
+                // I guess they just leave it be since the app is terminating anyway.
+                // https://ledger.readthedocs.io/en/latest/userspace/syscalls.html
+                // If using a return, break, continue or goto statement that jumps
+                // out of the TRY clause you MUST manually close it, or it could lead
+                // to a crash of the application in a later THROW.
                 break;
             }
             FINALLY
