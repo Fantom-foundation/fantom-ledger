@@ -6,4 +6,11 @@
 #define API_LEVEL_MIN = 9;
 #define API_LEVEL_MAX = 10;
 
+// data exchange details
+#define CLA 0xE0
+
+// security limits
+#define MIN_BIP32_PATH 2
+#define MAX_BIP32_PATH 10
+
 #endif
