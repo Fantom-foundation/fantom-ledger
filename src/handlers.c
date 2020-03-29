@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "handlers.h"
+#include "state.h"
 
 // getHandler implements APDU instruction to handler mapping.
 // The APDU protocol uses single byte instruction code (INS)
@@ -8,16 +9,16 @@
 // See doc/app_design.md for list of instructions.
 handler_fn_t *getHandler(uint8_t ins) {
     switch (ins) {
-        case 0x01:
+        case INS_VERSION:
             return handleGetVersion;
 
-        case 0x10:
+        case INS_GET_KEY:
             return handleGetPublicKey;
 
-        case 0x11:
+        case INS_GET_ADDR:
             return handleGetAddress;
 
-        case 0x20:
+        case INS_SIGN_TX:
             return handleSignTransaction;
 
         default:
