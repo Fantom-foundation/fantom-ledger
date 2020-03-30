@@ -3,8 +3,8 @@
 #include "get_version.h"
 #include "glyphs.h"
 
-// STEP_CONTENT macro is used for pure formatting purpose.
-#define STEP_CONTENT(...) { __VA_ARGS__ }
+// ITEMS macro is used for pure formatting purpose.
+#define ITEMS(...) { __VA_ARGS__ }
 
 // UX_STEP_NOCB is a macro for simple flow step, given its name, layout and content.
 // ux_idle_main is the main idle screen.
@@ -15,7 +15,7 @@
 UX_STEP_NOCB(
         ux_idle_main,
         pnn,
-        STEP_CONTENT (
+        ITEMS (
             &C_fantom_logo,
             "Fantom Nano",
             "Ready ..."
@@ -27,7 +27,7 @@ UX_STEP_NOCB(
 UX_STEP_NOCB(
         ux_idle_version,
         bn,
-        STEP_CONTENT(
+        ITEMS(
             "Version",
             APPVERSION,
         )
@@ -40,7 +40,7 @@ UX_STEP_CB(
         ux_idle_quit,
         pb,
         os_sched_exit(-1),
-        STEP_CONTENT(
+        ITEMS(
             &C_icon_dashboard_x,
             "Quit"
         )
