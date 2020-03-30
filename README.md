@@ -1,6 +1,6 @@
 # Fantom Ledger App
 
-Fantom Ledger Nano S hardware wallet and secure key storage application.
+Fantom Ledger Nano S and/or Ledger Nano X hardware wallet and secure key storage application.
 
 ## Building the source
 
@@ -25,7 +25,7 @@ Don't forget to reload udev rules in system's shell to load the changes.
 udevadm control --reload
 ```
 
-Following article can hel you [fix your connection problems](https://support.ledger.com/hc/en-us/articles/115005165269-Fix-connection-issues).
+Following article can help you [fix your connection problems](https://support.ledger.com/hc/en-us/articles/115005165269-Fix-connection-issues).
 
 ### Load the Application
 
