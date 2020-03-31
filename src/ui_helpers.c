@@ -7,7 +7,7 @@
 
 // displayState defines the common display state container shared between paginated text and prompt states.
 // We use this trick since only one of the two may happen at any time.
-displayState_t displayState;
+display_state_t displayState;
 
 // G_ux is a magic global variable implicitly referenced by the UX_ macros.
 // Apps should never need to reference it directly.
@@ -144,7 +144,7 @@ void ui_displayPaginatedText(
 
     // copy strings from source to the state structure (including string terminator)
     os_memmove(ctx->header, headerStr, header_len);
-    os_memmove(ctx->fullText, bodyStr, body_len);
+    os_memmove(ctx->text, bodyStr, body_len);
 
     // initialize callback; we don't need rejection callback
     // since user is not deciding anything here

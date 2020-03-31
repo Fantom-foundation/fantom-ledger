@@ -9,12 +9,15 @@
 // Here starts the UX flow for paginated text.
 // ---------------------------------------------
 
-// ui_confirmPaginatedText implements callback for paginated text confirmation.
+// ui_confirmPaginatedText implements UX callback for paginated text confirmation action.
 void ui_confirmPaginatedText() {
     TRY_CATCH_UI({
-         ui_assertPaginatedTextGuard();
-         paginated_text_state_t *ctx = paginatedTextState;
-         ui_callbackConfirm(&ctx->callback);
+        // make sure we are on the right state before firing a callback
+        ui_assertPaginatedTextGuard();
+
+        // fire the callback to confirm end user finished reading the paginated text
+        paginated_text_state_t *ctx = paginatedTextState;
+        ui_callbackConfirm(&ctx->callback);
     });
 }
 
@@ -26,7 +29,7 @@ UX_STEP_CB(
     ui_confirmPaginatedText(),
     ITEMS(
         (char *)&displayState.paginatedText.header,
-        (char *)&displayState.paginatedText.fullText
+        (char *)&displayState.paginatedText.text
     )
 );
 
@@ -40,7 +43,7 @@ UX_STEP_CB(
     ITEMS(
         &C_icon_eye,
         (char *)&displayState.paginatedText.header,
-        (char *)&displayState.paginatedText.fullText
+        (char *)&displayState.paginatedText.text
     )
 );
 
@@ -67,4 +70,103 @@ void ui_doDisplayPaginatedText() {
         ux_layout_paging_reset();
         ux_flow_init(0, ux_paginated_text_flow, NULL);
     }
+}
+
+// ---------------------------------------------
+// Here starts the UX flow for prompt question.
+// ---------------------------------------------
+
+// ui_confirmPrompt implements UX callback for prompt confirmation action.
+void ui_confirmPrompt()
+{
+    TRY_CATCH_UI({
+        // verify we are on the right state before firing the callback
+        ui_assertPromptGuard();
+
+        // fire the corresponding call to process
+        // user's acceptance of the course of action
+        prompt_state_t* ctx = promptState;
+        ui_callbackConfirm(&ctx->callback);
+    });
+}
+
+// ui_rejectPrompt implements UX callback for prompt rejection action.
+void ui_rejectPrompt()
+{
+    TRY_CATCH_UI({
+        // verify we are on the right state before firing the callback
+        ui_assertPromptGuard();
+
+        // fire the corresponding call to process
+        // user's rejection of the course of action
+        prompt_state_t* ctx = promptState;
+        ui_callbackReject(&ctx->callback);
+    });
+}
+
+// UX_STEP_CB is a macro for a simple flow step with a validation callback.
+// Here we initialize simple layout (pbb layout means icon + two lines of bold text)
+// with confirmation callback.
+UX_STEP_CB(
+    ux_display_prompt_confirm_step,
+    pbb,
+    ui_confirmPrompt(),
+    ITEMS(
+        &C_icon_validate_14,
+        (char *)&displayState.prompt.header,
+        (char *)&displayState.prompt.text,
+    )
+);
+
+// UX_STEP_CB is a macro for a simple flow step with a validation callback.
+// Here we initialize simple layout (pb layout means icon + one line of bold text)
+// with rejection callback.
+UX_STEP_CB(
+    ux_display_prompt_reject_step,
+    pb,
+    ui_rejectPrompt(),
+    ITEMS(
+        &C_icon_crossmark,
+        "Reject?"
+    )
+);
+
+// UX_FLOW defines flow for a question with confirmation prompt.
+UX_FLOW(
+    ux_prompt_flow,
+    &ux_display_prompt_confirm_step,
+    &ux_display_prompt_reject_step
+);
+
+// ui_doDisplayPrompt implements actual change in UX flow to show the configured prompt.
+void ui_doDisplayPrompt() {
+    // start the prompt flow
+    ux_flow_init(0, ux_prompt_flow, NULL);
+}
+
+// ---------------------------------------------
+// Here starts the UX flow for busy screen.
+// ---------------------------------------------
+
+// UX_STEP_NOCB is a macro for simple flow step without any additional callbacks or params.
+// Here we initialize simple layout (pn layout means icon + one line of normal text).
+UX_STEP_NOCB(
+    ux_display_busy_step,
+    pn,
+    ITEMS(
+        &C_icon_loader,
+        "Please wait ..."
+    )
+);
+
+// UX_FLOW defines flow for a simple busy screen with no user interaction.
+UX_FLOW(
+    ux_busy_flow,
+    &ux_display_busy_step
+);
+
+// ui_doDisplayBusy implements actual change in UX flow to show the busy screen.
+void ui_doDisplayBusy() {
+    // start the busy flow
+    ux_flow_init(0, ux_busy_flow, NULL);
 }
