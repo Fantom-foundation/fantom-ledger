@@ -34,7 +34,7 @@ typedef struct {
 typedef struct {
     uint16_t guard;
     char header[30];
-    char fullText[200];
+    char text[200];
     ui_callback_t callback;
 } paginated_text_state_t;
 
@@ -88,6 +88,9 @@ void ui_doDisplayPrompt();
 
 // ui_doDisplayPaginatedText implements actual change in UX flow to show the configured paginated text.
 void ui_doDisplayPaginatedText();
+
+// ui_doDisplayBusy implements actual change in UX flow to show the busy screen.
+void ui_doDisplayBusy();
 
 // ui_callbackConfirm implements action callback for confirmed prompt.
 void ui_callbackConfirm(ui_callback_t *cb);
