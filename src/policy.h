@@ -34,9 +34,9 @@ security_policy_t policyForSignTxOutputAddress(const uint8_t *addressBuffer, siz
 // policyForGetPublicKey implements policy test for transaction fee validation on tx signing process.
 security_policy_t policyForSignTxFee(uint64_t fee);
 
-// ENSURE_NOT_DENIED tests given policy for denied status and throws
-// an exception if the action has been denied.
-static inline void ENSURE_NOT_DENIED(security_policy_t policy) {
+// ASSERT_NOT_DENIED tests given policy for denied status and throws
+// an exception if the action has indeed been denied.
+static inline void ASSERT_NOT_DENIED(security_policy_t policy) {
     if (policy == POLICY_DENY) {
         THROW(ERR_REJECTED_BY_POLICY);
     }

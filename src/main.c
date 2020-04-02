@@ -122,14 +122,14 @@ static void fantom_main(void) {
                 // validate the instruction context for the current call
                 // do we start a new instruction, or is this a next step
                 // in previously started multi-step instruction we are in?
-                bool isNewIns = false;
+                bool isNew = false;
                 if (currentIns == INS_NONE) {
                     // reset the instruction state to be sure there is nothing left from previous one
-                    os_memset(&insState, 0, SIZEOF(insState));
+                    MEMCLEAR(&insState, insState);
 
                     // remember what instruction we process now; start a new instruction
                     currentIns = header->ins;
-                    isNewIns = true;
+                    isNew = true;
                 } else {
                     // validate that the incoming instruction is the one we handle now
                     // we reject a new instruction in the middle of processing previous one
@@ -142,7 +142,7 @@ static void fantom_main(void) {
                           header->p2,
                           data,
                           header->lc,
-                          isNewIns);
+                          isNew);
 
                 // If io_exchange is the only call that blocks, how can we tell it
                 // to wait for user input? The answer is a special flag, IO_ASYNC_REPLY. When
