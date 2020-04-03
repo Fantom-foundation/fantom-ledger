@@ -1,7 +1,7 @@
 #include "common.h"
 #include "errors.h"
 #include "bip44.h"
-#include "endian.h"
+#include "big_endian_io.h"
 
 // MAX_REASONABLE_ACCOUNT is maximal number of accounts managed by the ledger app (index 2)
 static const uint32_t MAX_REASONABLE_ACCOUNT = 10;
