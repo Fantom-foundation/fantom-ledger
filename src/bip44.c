@@ -176,17 +176,18 @@ void bip44_pathToStr(const bip44_path_t *path, char *out, size_t outSize) {
         ptr += res; \
     }
 
-    // the path starts with static char
+    // path textual representation starts with static char <m>
+    // see https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
     WRITE("m");
 
     // make sure the number of elements in the path does not exceed
-    // total available positions. This is a sanity check, the parser
+    // total available positions. This is sanity check, the parser
     // should have already checked the value.
     ASSERT(path->length < ARRAY_LEN(path->path));
 
-    // parse each individual index in the general BIP32 path
+    // parse each individual index in the BIP32 path
     for (size_t i = 0; i < path->length; i++) {
-        uint32_t value = pathSpec->path[i];
+        uint32_t value = path->path[i];
 
         // hardened values are marked with apostrophe after the value
         if ((value & HARDENED_BIP32) == HARDENED_BIP32) {
