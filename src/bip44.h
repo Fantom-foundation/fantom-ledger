@@ -69,4 +69,7 @@ bool bip44_containsMoreThanAddress(const bip44_path_t *path);
 // bip44_isHardened implements check if the given index value is hardened.
 bool bip44_isHardened(uint32_t value);
 
+// bip44_pathToStr converts BIP44 path to human readable form for displaying.
+void bip44_pathToStr(const bip44_path_t*, char* out, size_t outSize);
+
 #endif //FANTOM_LEDGER_BIP44_H

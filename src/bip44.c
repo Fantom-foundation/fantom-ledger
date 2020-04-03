@@ -146,3 +146,56 @@ bool bip44_hasReasonableAddress(const bip44_path_t *path) {
 bool bip44_containsMoreThanAddress(const bip44_path_t *path) {
     return (path->length > BIP44_I_REST);
 }
+
+// bip44_pathToStr converts BIP44 path to human readable form for displaying.
+void bip44_pathToStr(const bip44_path_t *path, char *out, size_t outSize) {
+    // make sure the buffer is not exceeding sane size (we have only 4kB of memory after all)
+    ASSERT(outSize < MAX_BUFFER_SIZE);
+
+    // we need to have at least space for string terminator
+    ASSERT(outSize > 0);
+
+    char *ptr = out;
+    char *end = (out + outSize);
+
+#define WRITE(fmt, ...) \
+    { \
+        /* make sure we have enough space left */ \
+        ASSERT(ptr <= end); \
+        /* make sure the buffer is of the right type */ \
+        STATIC_ASSERT(sizeof(end - ptr) == sizeof(size_t), "bad size_t size"); \
+        /* how much space do we have left */ \
+        size_t availableSize = (size_t) (end - ptr); \
+        /* push the formatted string */ \
+        snprintf(ptr, availableSize, fmt, ##__VA_ARGS__); \
+        /* how much did we spend */ \
+        size_t res = strlen(ptr); \
+        /* make sure we are well below the buffer size */ \
+        ASSERT(res + 1 < availableSize); \
+        /* advance buffer position */ \
+        ptr += res; \
+    }
+
+    // the path starts with static char
+    WRITE("m");
+
+    // make sure the number of elements in the path does not exceed
+    // total available positions. This is a sanity check, the parser
+    // should have already checked the value.
+    ASSERT(path->length < ARRAY_LEN(path->path));
+
+    // parse each individual index in the general BIP32 path
+    for (size_t i = 0; i < path->length; i++) {
+        uint32_t value = pathSpec->path[i];
+
+        // hardened values are marked with apostrophe after the value
+        if ((value & HARDENED_BIP32) == HARDENED_BIP32) {
+            WRITE("/%d'", (int) (value & ~HARDENED_BIP32));
+        } else {
+            WRITE("/%d", (int) value);
+        }
+    }
+
+    // make sure we did not leaked
+    ASSERT(ptr < end);
+}
