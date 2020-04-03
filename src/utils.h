@@ -46,5 +46,8 @@
 // start using such variable. deprecated deals with that.
 #define MARK_UNUSED __attribute__ ((unused, deprecated))
 
+// Any buffer claiming to be longer than this is a bug
+// We have only 4KB of memory available
+#define MAX_BUFFER_SIZE 1024
 
 #endif //FANTOM_LEDGER_UTILS_H

@@ -12,7 +12,7 @@
 #include "errors.h"
 #include "derive_key.h"
 #include "utils.h"
-#include "endian.h"
+#include "big_endian_io.h"
 
 // derivePrivateKey implements private key derivation from internal root key.
 void derivePrivateKey(

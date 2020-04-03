@@ -22,4 +22,10 @@ typedef union {
 // to identify idle/waiting state.
 extern int currentIns;
 
+// instructionState declares a current instruction state registry.
+// Only one APDU instruction is being handled at any time and a new one
+// can not be started before the previous one is either finished or terminated.
+// For that reason we use joined structure for all the states in one place.
+extern instruction_state_t instructionState;
+
 #endif
