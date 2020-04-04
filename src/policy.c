@@ -41,7 +41,7 @@ security_policy_t policyForGetAddress(const bip44_path_t *path) {
     WARN_IF(!bip44_hasReasonableAddress(path));
 
     // warn if the path has more fields than defined by BIP44 standard
-    WARN_IF(!bip44_containsMoreThanAddress(path));
+    WARN_IF(bip44_containsMoreThanAddress(path));
 
     // display prompt by default
     PROMPT_IF(true);
@@ -71,7 +71,7 @@ security_policy_t policyForSignTxOutputPath(const bip44_path_t *path) {
     WARN_IF(!bip44_hasReasonableAddress(path));
 
     // warn if the path has more fields than defined by BIP44 standard
-    WARN_IF(!bip44_containsMoreThanAddress(path));
+    WARN_IF(bip44_containsMoreThanAddress(path));
 
     // if path is given and is ok, we pass the step by default
     // no need to display outgoing address specified by valid path
