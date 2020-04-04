@@ -40,7 +40,10 @@ enum {
 
     // Error codes above this value are ok to be passed to host.
     // Any other error will trigger SEPROXYHAL reset.
-    _ERR_PASS_TO = 0x6E10
+    _ERR_PASS_TO = 0x6E10,
+
+    // Security assertion failed error; this should never get passed to host!
+    ERR_ASSERT = 0x6E32
 };
 
 #endif
