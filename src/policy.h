@@ -1,6 +1,8 @@
 #ifndef FANTOM_LEDGER_POLICY_H
 #define FANTOM_LEDGER_POLICY_H
 
+#include <os_io_seproxyhal.h>
+#include "bip44.h"
 #include "errors.h"
 
 // security_policy_t defines levels of security policy enforcement
