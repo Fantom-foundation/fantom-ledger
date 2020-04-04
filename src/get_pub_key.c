@@ -33,7 +33,8 @@ void handleGetPublicKey(
         uint8_t p2,
         uint8_t *wireBuffer,
         size_t wireSize,
-        bool isOnInit) {
+        bool isOnInit
+) {
     // make sure the state is clean
     if (isOnInit) {
         os_memset(ctx, 0, SIZEOF(*ctx));
@@ -98,7 +99,7 @@ static void runGetPublicKeyUIStep() {
         case UI_STEP_WARNING:
             // display the warning
             ui_displayPaginatedText(
-                    "Unusual request",
+                    "Unusual request!",
                     "Proceed with care",
                     this_fn
             );
@@ -114,7 +115,7 @@ static void runGetPublicKeyUIStep() {
 
             // display BIP44 path
             ui_displayPaginatedText(
-                    "Export public key",
+                    "Exporting key",
                     pathStr,
                     this_fn
             );
@@ -127,7 +128,7 @@ static void runGetPublicKeyUIStep() {
             // ask user to confirm the key export
             ui_displayPrompt(
                     "Confirm export",
-                    "public key?",
+                    "of public key?",
                     this_fn,
                     ui_respondWithUserReject
             );
@@ -137,14 +138,14 @@ static void runGetPublicKeyUIStep() {
             break;
 
         case UI_STEP_RESPOND:
-            // make sure the response is ready
+            // make sure the public key is ready
             ASSERT(ctx->responseReady == RESPONSE_READY_TAG);
 
             // send the data to remote host and switch idle
             io_send_buf(SUCCESS, (uint8_t * ) & ctx->pubKey, SIZEOF(ctx->pubKey));
             ui_idle();
 
-            // set invalid step so we don't cycle around
+            // set invalid step so we never cycle around
             ctx->ui_step = UI_STEP_INVALID;
             break;
 
