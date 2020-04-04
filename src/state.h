@@ -2,6 +2,7 @@
 #define FANTOM_LEDGER_STATE_H
 
 #include "get_pub_key.h"
+#include "get_address.h"
 
 // Declares what instructions are recognized and processed by the application.
 #define INS_NONE = -1;
@@ -15,6 +16,7 @@
 // can rut at any time.
 typedef union {
     ins_get_ext_pubkey_context_t insGetPubKeyContext;
+    ins_get_address_context_t insGetAddressContext;
 } instruction_state_t;
 
 // currentIns declares a current instruction registry.
