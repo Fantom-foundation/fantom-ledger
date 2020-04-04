@@ -111,7 +111,7 @@ static void fantom_main(void) {
                 VALIDATE(header->cla == CLA, ERR_UNKNOWN_CLA);
 
                 // get the payload pointer (data payload starts just after the header)
-                uint8_t *data = G_io_apdu_buffer + SIZEOF(*header);
+                uint8_t * data = G_io_apdu_buffer + SIZEOF(*header);
 
                 // find the handler we will be using to process the incoming instruction (handlers.h)
                 handler_fn_t *handlerFn = getHandler(header->ins);
@@ -125,7 +125,7 @@ static void fantom_main(void) {
                 bool isNew = false;
                 if (currentIns == INS_NONE) {
                     // reset the instruction state to be sure there is nothing left from previous one
-                    MEMCLEAR(&insState, insState);
+                    MEMCLEAR(&instructionState, instructionState);
 
                     // remember what instruction we process now; start a new instruction
                     currentIns = header->ins;
@@ -159,9 +159,7 @@ static void fantom_main(void) {
             {
                 // reset device on assertion exception
                 // this should be _enabled_ for production build
-                #ifdef RESET_ON_CRASH
                 io_seproxyhal_se_reset();
-                #endif
             }
             CATCH_OTHER(e)
             {
@@ -176,15 +174,17 @@ static void fantom_main(void) {
                     ui_idle();
                 } else {
                     // unknown error happened; reset the device
-                    #ifdef RESET_ON_CRASH
                     io_seproxyhal_se_reset();
-                    #endif
                 }
+            }
+            FINALLY
+            {
             }
         }
         END_TRY;
     }
 }
+
 
 // ---------------------------------------------
 // Everything below this point is Ledger magic.
@@ -222,10 +222,10 @@ __attribute__((section(".boot"))) int main(void) {
             {
                 io_seproxyhal_init();
 
-                #if defined(TARGET_NANOX)
+#if defined(TARGET_NANOX)
                 // grab the current plane mode setting
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-                #endif
+#endif
 
                 USB_power(0);
                 USB_power(1);

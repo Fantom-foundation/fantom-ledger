@@ -1,54 +1,12 @@
 #include <os_io_seproxyhal.h>
 #include "conf.h"
+#include "utils.h"
 #include "io.h"
 #include "assert.h"
 #include "errors.h"
 
 // io_state keeps the state of the expected i/o exchange.
 io_state_t io_state;
-
-// use timer to trigger callback on Nano S; it does not work on Nano X current API.
-#if defined(TARGET_NANOS)
-
-// timeout_cb keeps the current callback function reference.
-static timeout_callback_fn_t* timeout_cb;
-
-// nanos_clear_timer removes timeout callback from the timer.
-void nanos_clear_timer() {
-    timeout_cb = NULL;
-}
-
-// nanos_set_timer sets a callback function to be triggered after specified time interval.
-void nanos_set_timer(int ms, timeout_callback_fn_t* cb)
-{
-    // check if we are ok to place the new timer callback
-    ASSERT(timeout_cb == NULL);
-
-    // timer delay has to make sense
-    ASSERT(ms >= 0);
-
-    // keep the callback reference and set the actual timer interval
-    timeout_cb = cb;
-    UX_CALLBACK_SET_INTERVAL((unsigned) ms);
-}
-
-// HANDLE_UX_TICKER_EVENT implements callback triggering on timeout for Nano S.
-#define HANDLE_UX_TICKER_EVENT(ux_allowed) \
-    do {\
-        if (timeout_cb) \
-        { \
-            /* clear the callback ref before calling to be safe in case the call throws an exception */
-            timeout_callback_fn_t* callback = timeout_cb; \
-            timeout_cb = NULL; \
-            callback(ux_allowed); \
-        } \
-    } while(0)
-#elif defined(TARGET_NANOX)
-// HANDLE_UX_TICKER_EVENT is disabled on Nano X.
-// Nano X uses UX_STEP_CB/UX_STEP_NOCB macros on the SDK and they cause our callback
-// to be ignored in UX_TICKER_EVENT, so set_timer does not work on Nano X.
-#define HANDLE_UX_TICKER_EVENT(ux_allowed) do {} while(0)
-#endif
 
 // CHECK_RESPONSE_SIZE checks is response is within the size of the buffer
 // to prevent unwanted overflows
@@ -133,7 +91,7 @@ unsigned char io_event(unsigned char channel MARK_UNUSED) {
             UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
                     // the ticker is handled by a macro defined above
                     // Disabled for Nano X due to new SDK ignoring this callback on UX_TICKER_EVENT.
-                    HANDLE_UX_TICKER_EVENT(UX_ALLOWED);
+                    // HANDLE_UX_TICKER_EVENT(UX_ALLOWED);
             });
             break;
     }
