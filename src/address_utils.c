@@ -4,6 +4,8 @@
 
 #include "os.h"
 #include "cx.h"
+#include "utils.h"
+#include "derive_key.h"
 #include "address_utils.h"
 
 // HEXDIGITS defines textual glyphs usable for address generation
@@ -13,26 +15,57 @@ static const uint8_t const HEXDIGITS[] = "0123456789abcdef";
 static const uint8_t const MASK[] = {0x80, 0x40, 0x20, 0x10,
                                      0x08, 0x04, 0x02, 0x01};
 
-// getAddressStr implements formatting wallet address for given public key.
-void getAddressStr(cx_ecfp_public_key_t *publicKey, uint8_t *out) {
-    // make sure there is enough space in output buffer for the address, last byte is the terminator
-    STATIC_ASSERT(SIZEOF(*out) > 40, "bad output address size");
+// deriveAddress implements address derivation for given BIP44 path.
+size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outputSize) {
+    // make sure there is enough space in output buffer for the address
+    STATIC_ASSERT(SIZEOF(*out) >= 20, "bad output address size");
 
-    // prep SHA3 context
-    cx_sha3_t sha3Context;
+    // make sanity check, the buffer may never exceed this number
+    ASSERT(outputSize < MAX_BUFFER_SIZE);
 
-    // prep raw address buffer and calculate the raw address
-    uint8_t rawAddress[20];
-    getRawAddress(publicKey, &rawAddress, &sha3Context);
+    // prep containers for private key
+    private_key_t privateKey;
+    chain_code_t chainCode;
+    size_t addressSize = 0;
 
-    // convert raw address to string and populate the output buffer
-    formatRawAddressStr(&rawAddress, out, &sha3Context);
+    BEGIN_TRY
+    {
+        TRY
+        {
+            // get the private code for the path
+            derivePrivateKey(
+                    path,
+                    &chainCode,
+                    &privateKey
+            );
+
+            // prep container for public key
+            cx_ecfp_public_key_t publicKey;
+
+            // derive the public key from the private one
+            deriveRawPublicKey(&privateKey, &publicKey);
+
+            // get raw address for the public key
+            addressSize = getRawAddress(&publicKey, sha3Context, out, outputSize);
+        }
+        FINALLY
+        {
+            // clear the private key storage so we don't leak it after this call
+            os_memset(&privateKey, 0, SIZEOF(privateKey));
+        }
+    }
+    END_TRY;
+
+    return addressSize;
 }
 
 // getRawAddress implements wallet address calculation for given public key.
-void getRawAddress(cx_ecfp_public_key_t *publicKey, uint8_t *out, cx_sha3_t *sha3Context) {
+void getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, uint8_t *out, size_t outputSize) {
     // make sure there is enough space in output buffer for the raw address
     STATIC_ASSERT(SIZEOF(*out) >= 20, "bad raw address size");
+
+    // make sanity check, the buffer may never exceed this number
+    ASSERT(outputSize < MAX_BUFFER_SIZE);
 
     // make a buffer
     uint8_t hashAddress[32];
@@ -47,13 +80,16 @@ void getRawAddress(cx_ecfp_public_key_t *publicKey, uint8_t *out, cx_sha3_t *sha
     os_memmove(out, hashAddress + 12, 20);
 }
 
-// formatRawAddressStr implements formatting of a raw address into a human readable textual form.
-void formatRawAddressStr(uint8_t *address, uint8_t *out, cx_sha3_t *sha3Context) {
+// formatAddressStr implements formatting of a raw address into a human readable textual form.
+void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, uint8_t *out, size_t outputSize) {
     // make sure there is enough space in output buffer for the address, last byte is the terminator
-    STATIC_ASSERT(SIZEOF(*out) > 40, "bad output address size");
+    STATIC_ASSERT(SIZEOF(*out) > 40, "bad output address buffer");
 
     // make sure tha address is of expected size
     STATIC_ASSERT(SIZEOF(*address) == 20, "bad address size");
+
+    // make sanity check, the buffer may never exceed this number
+    ASSERT(outputSize < MAX_BUFFER_SIZE);
 
     // prep checksum buffer
     uint8_t hashChecksum[32];
