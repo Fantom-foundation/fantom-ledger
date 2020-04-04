@@ -60,7 +60,7 @@ bool bip44_hasValidFantomPrefix(const bip44_path_t *path) {
     CHECK(path->length > BIP44_I_COIN_TYPE);
 
     // the purpose should be #44 (BIP44 specification) and should be hardened
-    CHECK(path->path[BIP44_I_PURPOSE] == (BIP_44 | HARDENED_BIP32));
+    CHECK(path->path[BIP44_I_PURPOSE] == (BIP44 | HARDENED_BIP32));
 
     // the coin type has to be valid Fantom coin type and should be hardened
     CHECK(path->path[BIP44_I_COIN_TYPE] == (FANTOM_COIN_TYPE | HARDENED_BIP32));

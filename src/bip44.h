@@ -7,7 +7,7 @@
 // bip44_path_t declares full BIP44 path type
 // see BIP44 specification https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
 typedef struct {
-    uint32_t path[BIP44_MAX_PATH_LENGTH];
+    uint32_t path[BIP32_MAX_PATH_LENGTH];
     uint32_t length;
 } bip44_path_t;
 
