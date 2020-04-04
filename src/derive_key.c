@@ -71,7 +71,7 @@ void derivePrivateKey(
 
 // deriveRawPublicKey implements public key derivation from provided derived private key.
 void deriveRawPublicKey(
-        const privateKey_t *privateKey,
+        const private_key_t *privateKey,
         cx_ecfp_public_key_t *publicKey
 ) {
     io_seproxyhal_io_heartbeat();
