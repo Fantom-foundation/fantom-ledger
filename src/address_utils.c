@@ -13,6 +13,22 @@ static const uint8_t const HEXDIGITS[] = "0123456789abcdef";
 static const uint8_t const MASK[] = {0x80, 0x40, 0x20, 0x10,
                                      0x08, 0x04, 0x02, 0x01};
 
+// getAddressStr implements formatting wallet address for given public key.
+void getAddressStr(cx_ecfp_public_key_t *publicKey, uint8_t *out) {
+    // make sure there is enough space in output buffer for the address, last byte is the terminator
+    STATIC_ASSERT(SIZEOF(*out) > 40, "bad output address size");
+
+    // prep SHA3 context
+    cx_sha3_t sha3Context;
+
+    // prep raw address buffer and calculate the raw address
+    uint8_t rawAddress[20];
+    getRawAddress(publicKey, &rawAddress, &sha3Context);
+
+    // convert raw address to string and populate the output buffer
+    formatRawAddressStr(&rawAddress, out, &sha3Context);
+}
+
 // getRawAddress implements wallet address calculation for given public key.
 void getRawAddress(cx_ecfp_public_key_t *publicKey, uint8_t *out, cx_sha3_t *sha3Context) {
     // make sure there is enough space in output buffer for the raw address
@@ -29,19 +45,6 @@ void getRawAddress(cx_ecfp_public_key_t *publicKey, uint8_t *out, cx_sha3_t *sha
 
     // move the last 20 bytes of the hash to output buffer
     os_memmove(out, hashAddress + 12, 20);
-}
-
-// getAddressStr implements formatting wallet address for given public key.
-void getAddressStr(cx_ecfp_public_key_t *publicKey, uint8_t *out, cx_sha3_t *sha3Context) {
-    // make sure there is enough space in output buffer for the address, last byte is the terminator
-    STATIC_ASSERT(SIZEOF(*out) > 40, "bad output address size");
-
-    // prep raw address buffer and calculate the raw address
-    uint8_t rawAddress[20];
-    getRawAddress(publicKey, &rawAddress, sha3Context);
-
-    // convert raw address to string and populate the output buffer
-    formatRawAddressStr(&rawAddress, out, sha3Context);
 }
 
 // formatRawAddressStr implements formatting of a raw address into a human readable textual form.
