@@ -135,8 +135,8 @@ void ui_displayPaginatedText(
     size_t body_len = strlen(bodyStr);
 
     // prevent overflow; extra space is for string terminator
-    ASSERT(header_len < SIZEOF(ctx->header));
-    ASSERT(body_len < SIZEOF(ctx->fullText));
+    ASSERT(header_len < SIZEOF(paginatedTextState->header));
+    ASSERT(body_len < SIZEOF(paginatedTextState->text));
 
     // clear the state memory; use safe macro from utils.h
     MEMCLEAR(&displayState, displayState);

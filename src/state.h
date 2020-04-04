@@ -5,11 +5,11 @@
 #include "get_address.h"
 
 // Declares what instructions are recognized and processed by the application.
-#define INS_NONE = -1;
-#define INS_VERSION = 0x01;
-#define INS_GET_KEY = 0x10;
-#define INS_GET_ADDR = 0x11;
-#define INS_SIGN_TX = 0x20;
+#define INS_NONE -1
+#define INS_VERSION 0x01
+#define INS_GET_KEY 0x10
+#define INS_GET_ADDR 0x11
+#define INS_SIGN_TX 0x20
 
 // instruction_state_t defines unified APDU instruction state.
 // We use joined instruction state storage since only one instruction

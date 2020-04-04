@@ -49,10 +49,10 @@ void handleGetPublicKey(
     VALIDATE(p2 == 0, ERR_INVALID_PARAMETERS);
 
     // parse BIP44 path from the wire buffer so we can derive keys for it
-    size_t parsedSize = bip44_parseFromWire(&ctx->path, wireDataBuffer, wireDataSize);
+    size_t parsedSize = bip44_parseFromWire(&ctx->path, wireBuffer, wireSize);
 
     // make sure size of the data we parsed corresponds with the data we received
-    if (parsedSize != wireDataSize) {
+    if (parsedSize != wireSize) {
         THROW(ERR_INVALID_DATA);
     }
 
@@ -67,7 +67,7 @@ void handleGetPublicKey(
     );
 
     // mark the response to be ready to deliver
-    ctx->responseReadyMagic = RESPONSE_READY_TAG;
+    ctx->responseReady = RESPONSE_READY_TAG;
 
     // where on the UI scenario we start depends on the policy
     switch (policy) {
@@ -96,7 +96,7 @@ static void runGetPublicKeyUIStep() {
 
     // resume the stage based on previous result
     switch (ctx->ui_step) {
-        case UI_STEP_WARNING:
+        case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
                     "Unusual request!",
@@ -107,8 +107,9 @@ static void runGetPublicKeyUIStep() {
             // set next step
             ctx->ui_step = UI_STEP_DISPLAY_PATH;
             break;
+        }
 
-        case UI_STEP_DISPLAY_PATH:
+        case UI_STEP_DISPLAY_PATH: {
             // prep container for BIP44 path and format it
             char pathStr[100];
             bip44_pathToStr(&ctx->path, pathStr, SIZEOF(pathStr));
@@ -123,8 +124,9 @@ static void runGetPublicKeyUIStep() {
             // set next step
             ctx->ui_step = UI_STEP_CONFIRM;
             break;
+        }
 
-        case UI_STEP_CONFIRM:
+        case UI_STEP_CONFIRM: {
             // ask user to confirm the key export
             ui_displayPrompt(
                     "Confirm export",
@@ -136,8 +138,9 @@ static void runGetPublicKeyUIStep() {
             // set next step
             ctx->ui_step = UI_STEP_RESPOND;
             break;
+        }
 
-        case UI_STEP_RESPOND:
+        case UI_STEP_RESPOND: {
             // make sure the public key is ready
             ASSERT(ctx->responseReady == RESPONSE_READY_TAG);
 
@@ -148,9 +151,11 @@ static void runGetPublicKeyUIStep() {
             // set invalid step so we never cycle around
             ctx->ui_step = UI_STEP_INVALID;
             break;
+        }
 
-        default:
+        default: {
             // we don't tolerate invalid state
             ASSERT(false);
+        }
     }
 }

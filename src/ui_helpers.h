@@ -7,7 +7,7 @@
 // MAX_SIMPLE_TEXT_LENGTH defines the maximal length of a text
 // which can be displayed on a single screen on Ledger Nano devices.
 // everything longer must be displayed as paginated text with scrolling.
-#define MAX_SIMPLE_TEXT_LENGTH = 18;
+#define MAX_SIMPLE_TEXT_LENGTH 18
 
 // ui_callback_fn_t declares callback function from user interaction.
 typedef void ui_callback_fn_t();
@@ -153,6 +153,5 @@ static inline void ui_crash_handler() {
         } \
     } \
     END_TRY;
-#endif
 
 #endif //FANTOM_LEDGER_UI_HELPERS_H

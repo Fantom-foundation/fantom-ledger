@@ -59,10 +59,10 @@ void handleGetAddress(
     ctx->isShowAddress = (p1 == P1_DISPLAY_ADDRESS);
 
     // parse BIP44 path from the incoming request
-    size_t parsedSize = bip44_parseFromWire(&ctx->path, wireDataBuffer, wireDataSize);
+    size_t parsedSize = bip44_parseFromWire(&ctx->path, wireBuffer, wireSize);
 
     // make sure size of the data we parsed corresponds with the data we received
-    if (parsedSize != wireDataSize) {
+    if (parsedSize != wireSize) {
         THROW(ERR_INVALID_DATA);
     }
 
@@ -107,7 +107,7 @@ static void runGetAddressUIStep() {
 
     // resume the stage based on previous result
     switch (ctx->ui_step) {
-        case UI_STEP_WARNING:
+        case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
                     "Unusual request!",
@@ -118,8 +118,9 @@ static void runGetAddressUIStep() {
             // set next step
             ctx->ui_step = UI_STEP_DISPLAY_PATH;
             break;
+        }
 
-        case UI_STEP_DISPLAY_PATH:
+        case UI_STEP_DISPLAY_PATH: {
             // prep container for BIP44 path and format it
             char pathStr[100];
             bip44_pathToStr(&ctx->path, pathStr, SIZEOF(pathStr));
@@ -134,14 +135,15 @@ static void runGetAddressUIStep() {
             // set next step (check the comment above for the correct next step)
             ctx->ui_step = (ctx->isShowAddress ? UI_STEP_ADDRESS : UI_STEP_CONFIRM);
             break;
+        }
 
-        case UI_STEP_ADDRESS:
+        case UI_STEP_ADDRESS: {
             // make sure the address is well inside the available buffer
-            ASSERT (ctx->address.size < SIZEOF(ctx->address.buffer));
+            ASSERT(ctx->address.size < SIZEOF(ctx->address.buffer));
 
             // create formatted address buffer and format for display
             char addrStr[64];
-            formatAddressStr(&ctx->address.buffer, &ctx->sha3Context, &addrStr, SIZEOF(addrStr));
+            formatAddressStr(ctx->address.buffer, &ctx->sha3Context, addrStr, SIZEOF(addrStr));
 
             // show user the address being exported
             ui_displayPaginatedText(
@@ -153,8 +155,9 @@ static void runGetAddressUIStep() {
             // set next step
             ctx->ui_step = UI_STEP_RESPOND;
             break;
+        }
 
-        case UI_STEP_CONFIRM:
+        case UI_STEP_CONFIRM: {
             // ask user to confirm the key export
             ui_displayPrompt(
                     "Confirm address",
@@ -166,8 +169,9 @@ static void runGetAddressUIStep() {
             // set next step
             ctx->ui_step = UI_STEP_RESPOND;
             break;
+        }
 
-        case UI_STEP_RESPOND:
+        case UI_STEP_RESPOND: {
             // make sure the address is ready
             ASSERT(ctx->responseReady == RESPONSE_READY_TAG);
 
@@ -181,9 +185,11 @@ static void runGetAddressUIStep() {
             // set invalid step so we never cycle around
             ctx->ui_step = UI_STEP_INVALID;
             break;
+        }
 
-        default:
+        default: {
             // we don't tolerate invalid state
             ASSERT(false);
+        }
     }
 }
