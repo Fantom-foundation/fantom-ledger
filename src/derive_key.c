@@ -51,14 +51,14 @@ void derivePrivateKey(
             io_seproxyhal_io_heartbeat();
             os_perso_derive_node_bip32(
                     CX_CURVE_256K1,
-                    pathSpec->path,
-                    pathSpec->length,
+                    path->path,
+                    path->length,
                     privateKeyRawBuffer,
                     chainCode->code);
             io_seproxyhal_io_heartbeat();
 
             // copy the private key
-            cx_ecfp_init_private_key(CX_CURVE_256K1, privateKeyRawBuffer, RAW_PRIVATE_KEY_SIZE, &privateKey);
+            cx_ecfp_init_private_key(CX_CURVE_256K1, privateKeyRawBuffer, RAW_PRIVATE_KEY_SIZE, privateKey);
         }
         FINALLY
         {
@@ -75,7 +75,7 @@ void deriveRawPublicKey(
         cx_ecfp_public_key_t *publicKey
 ) {
     io_seproxyhal_io_heartbeat();
-    cx_ecfp_generate_pair(CX_CURVE_256K1, publicKey, (const struct cx_ecfp_256_private_key_s *) privateKey, 1);
+    cx_ecfp_generate_pair(CX_CURVE_256K1, publicKey, (cx_ecfp_256_private_key_t *) privateKey, 1);
     io_seproxyhal_io_heartbeat();
 }
 
@@ -132,10 +132,10 @@ void deriveExtendedPublicKey(
             deriveRawPublicKey(&privateKey, &publicKey);
 
             // make sure the public key size corresponds with our expectation
-            STATIC_ASSERT(SIZEOF(out->pubKey) == PUBLIC_KEY_SIZE, "bad pub key size");
+            STATIC_ASSERT(SIZEOF(out->publicKey) == PUBLIC_KEY_SIZE, "bad pub key size");
 
             // extract the public key data to the output buffer
-            extractRawPublicKey(&publicKey, out->pubKey, SIZEOF(out->pubKey));
+            extractRawPublicKey(&publicKey, out->publicKey, SIZEOF(out->publicKey));
 
             // make sure the chain code container size is what we expect
             STATIC_ASSERT(CHAIN_CODE_SIZE == SIZEOF(out->chainCode), "bad chain code size");
