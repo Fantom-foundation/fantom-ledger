@@ -5,6 +5,7 @@
 #include "handlers.h"
 #include "bip44.h"
 
+static const size_t RAW_PRIVATE_KEY_BUFFER =  64;
 static const size_t RAW_PRIVATE_KEY_SIZE =  32;
 static const size_t PUBLIC_KEY_SIZE =  32;
 static const size_t CHAIN_CODE_SIZE =  32;
@@ -19,6 +20,7 @@ typedef struct {
 
 // extended_public_key_t declares public key buffer with chain code type
 typedef struct {
+    uint8_t length;
     uint8_t publicKey[PUBLIC_KEY_SIZE];
     uint8_t chainCode[CHAIN_CODE_SIZE];
 } extended_public_key_t;

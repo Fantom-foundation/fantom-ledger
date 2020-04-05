@@ -30,7 +30,7 @@ void derivePrivateKey(
     ASSERT(path->length < ARRAY_LEN(path->path));
 
     // get a buffer for private key
-    uint8_t privateKeyRawBuffer[RAW_PRIVATE_KEY_SIZE];
+    uint8_t privateKeyRawBuffer[RAW_PRIVATE_KEY_BUFFER];
 
     // make sure we can safely erase chain code container since it's the right size
     STATIC_ASSERT(SIZEOF(chainCode->code) == CHAIN_CODE_SIZE, "bad chain code length");
@@ -75,7 +75,7 @@ void deriveRawPublicKey(
         cx_ecfp_public_key_t *publicKey
 ) {
     io_seproxyhal_io_heartbeat();
-    cx_ecfp_generate_pair(CX_CURVE_256K1, publicKey, (cx_ecfp_256_private_key_t *) privateKey, 1);
+    cx_ecfp_generate_pair(CX_CURVE_256K1, publicKey, (cx_ecfp_private_key_t *) privateKey, 1);
     io_seproxyhal_io_heartbeat();
 }
 
@@ -111,8 +111,9 @@ void deriveExtendedPublicKey(
     private_key_t privateKey;
     chain_code_t chainCode;
 
-    // make sure there is enough space in output buffer for both chain code and public key
-    STATIC_ASSERT(SIZEOF(*out) == CHAIN_CODE_SIZE + PUBLIC_KEY_SIZE, "bad ext pub key size");
+    // make sure the output structure is of the right dimension
+    // the 1st byte is for public key length, others are for the public key and chain code
+    STATIC_ASSERT(SIZEOF(*out) == 1 + PUBLIC_KEY_SIZE + CHAIN_CODE_SIZE, "bad ext pub key size");
 
     BEGIN_TRY
     {
@@ -136,6 +137,7 @@ void deriveExtendedPublicKey(
 
             // extract the public key data to the output buffer
             extractRawPublicKey(&publicKey, out->publicKey, SIZEOF(out->publicKey));
+            out->length = PUBLIC_KEY_SIZE;
 
             // make sure the chain code container size is what we expect
             STATIC_ASSERT(CHAIN_CODE_SIZE == SIZEOF(out->chainCode), "bad chain code size");
