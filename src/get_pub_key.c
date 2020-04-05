@@ -99,8 +99,8 @@ static void runGetPublicKeyUIStep() {
         case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
-                    "Unusual request!",
-                    "Proceed with care",
+                    "Unusual request",
+                    "Be careful!",
                     this_fn
             );
 
@@ -129,8 +129,8 @@ static void runGetPublicKeyUIStep() {
         case UI_STEP_CONFIRM: {
             // ask user to confirm the key export
             ui_displayPrompt(
-                    "Confirm export",
-                    "of public key?",
+                    "Confirm",
+                    "key export?",
                     this_fn,
                     ui_respondWithUserReject
             );
