@@ -178,7 +178,8 @@ void bip44_pathToStr(const bip44_path_t *path, char *out, size_t outSize) {
 
     // path textual representation starts with static char <m>
     // see https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
-    WRITE("m");
+    // but since it's always there, we may not need it.
+    // WRITE("m");
 
     // make sure the number of elements in the path does not exceed
     // total available positions. This is sanity check, the parser
