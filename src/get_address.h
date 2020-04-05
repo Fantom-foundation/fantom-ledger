@@ -15,8 +15,8 @@ typedef struct {
     bip44_path_t path;
     cx_sha3_t sha3Context;
     struct {
+        uint8_t size;
         uint8_t buffer[64];
-        size_t size;
     } address;
     bool isShowAddress;
     int ui_step;

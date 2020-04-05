@@ -110,8 +110,8 @@ static void runGetAddressUIStep() {
         case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
-                    "Unusual request!",
-                    "Proceed with care",
+                    "Unusual request",
+                    "Be careful!",
                     this_fn
             );
 
@@ -127,7 +127,7 @@ static void runGetAddressUIStep() {
 
             // display BIP44 path
             ui_displayPaginatedText(
-                    "Exporting key",
+                    "Address path",
                     pathStr,
                     this_fn
             );
@@ -147,7 +147,7 @@ static void runGetAddressUIStep() {
 
             // show user the address being exported
             ui_displayPaginatedText(
-                    "Check address",
+                    "Address",
                     addrStr,
                     this_fn
             );
@@ -160,8 +160,8 @@ static void runGetAddressUIStep() {
         case UI_STEP_CONFIRM: {
             // ask user to confirm the key export
             ui_displayPrompt(
-                    "Confirm address",
-                    "export?",
+                    "Confirm",
+                    "address?",
                     this_fn,
                     ui_respondWithUserReject
             );
@@ -179,7 +179,7 @@ static void runGetAddressUIStep() {
             ASSERT(ctx->address.size <= SIZEOF(ctx->address.buffer));
 
             // send the data to remote host and switch idle
-            io_send_buf(SUCCESS, ctx->address.buffer, ctx->address.size);
+            io_send_buf(SUCCESS, (uint8_t * ) & ctx->address, SIZEOF(ctx->address));
             ui_idle();
 
             // set invalid step so we never cycle around
