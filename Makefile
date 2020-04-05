@@ -1,6 +1,6 @@
 #*******************************************************************************
-#   Ledger App
-#   (c) 2017 Ledger
+#  Ledger App
+#  (c) 2017 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ $(error Environment variable BOLOS_SDK is not set)
 endif
 include $(BOLOS_SDK)/Makefile.defines
 
-APP_LOAD_PARAMS= --curve ed25519 --path "44'/1234'" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
+DEFINES_LIB = USE_LIB_ETHEREUM
+APP_LOAD_PARAMS= --curve secp256k1 --path "44'/60'" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
 
 APPVERSION_M=0
 APPVERSION_N=1
-APPVERSION_P=0
+APPVERSION_P=7
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 APPNAME = "Fantom Nano"
 
 DEFINES += $(DEFINES_LIB)
-
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 	ICONNAME=icons/nanox_fantom.gif
@@ -54,7 +54,7 @@ DEFINES   += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERS
 
 # U2F
 DEFINES   += HAVE_U2F HAVE_IO_U2F
-DEFINES   += U2F_PROXY_MAGIC=\"BOIL\"
+DEFINES   += U2F_PROXY_MAGIC=\"FTM\"
 DEFINES   += USB_SEGMENT_SIZE=64
 DEFINES   += BLE_SEGMENT_SIZE=32 #max MTU, min 20
 
@@ -64,6 +64,8 @@ DEFINES       += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | w
 DEFINES   += UNUSED\(x\)=\(void\)x
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
 
+# Protect stack overflows
+DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 DEFINES   	  += IO_SEPROXYHAL_BUFFER_SIZE_B=300
@@ -83,14 +85,16 @@ endif
 # Both nano S and X benefit from the flow.
 DEFINES       += HAVE_UX_FLOW
 
-# Enabling debug PRINTF
-DEBUG = 0
-ifneq ($(DEBUG),0)
 
+DEFINES += RESET_ON_CRASH
+
+# Enabling debug PRINTF
+DEBUG = 1
+ifneq ($(DEBUG),0)
         ifeq ($(TARGET_NAME),TARGET_NANOX)
-                DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
+                DEFINES   += DEVEL HAVE_PRINTF PRINTF=mcu_usb_printf
         else
-                DEFINES   += HAVE_PRINTF PRINTF=screen_printf
+                DEFINES   += DEVEL HAVE_PRINTF PRINTF=screen_printf
         endif
 else
         DEFINES   += PRINTF\(...\)=
@@ -116,12 +120,11 @@ endif
 CC       := $(CLANGPATH)clang
 
 #CFLAGS   += -O0
-CFLAGS   += -O3 -Os
+CFLAGS   += -O3 -Os -Wall -Wextra -Wuninitialized
 
 AS     := $(GCCPATH)arm-none-eabi-gcc
-
 LD       := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS  += -O3 -Os
+LDFLAGS  += -O3 -Os -Wall
 LDLIBS   += -lm -lgcc -lc
 
 # import rules to compile glyphs(/pone)
