@@ -159,7 +159,7 @@ static void fantom_main(void) {
             {
                 // reset device on assertion exception
                 // this should be _enabled_ for production build
-                io_seproxyhal_se_reset();
+                THROW(EXCEPTION_IO_RESET);
             }
             CATCH_OTHER(e)
             {
