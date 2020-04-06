@@ -1,7 +1,6 @@
 #ifndef FANTOM_LEDGER_MENU_H
 #define FANTOM_LEDGER_MENU_H
 
-#include <bolos_target.h>
 #include <os_io_seproxyhal.h>
 
 // ux_idle_flow declares the UI flow for idle state

@@ -11,7 +11,6 @@
 // The layout contains Fantom logo and two lines of normal text (pnn layout).
 // See SDK /lib_ux/include/ux_flow_engine for details about macros,
 // see /lib_ux/include/ux_layouts.h for layouts.
-
 UX_STEP_NOCB(
         ux_idle_main,
         pnn,
