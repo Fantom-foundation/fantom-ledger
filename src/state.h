@@ -3,6 +3,7 @@
 
 #include "get_pub_key.h"
 #include "get_address.h"
+#include "get_tx_sign.h"
 
 // Declares what instructions are recognized and processed by the application.
 #define INS_NONE -1
@@ -17,6 +18,7 @@
 typedef union {
     ins_get_ext_pubkey_context_t insGetPubKeyContext;
     ins_get_address_context_t insGetAddressContext;
+    ins_sign_tx_context_t insSignTxContext;
 } instruction_state_t;
 
 // currentIns declares a current instruction registry.
