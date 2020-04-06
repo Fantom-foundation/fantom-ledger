@@ -35,16 +35,10 @@ security_policy_t policyForGetPublicKey(const bip44_path_t* path);
 security_policy_t policyForGetAddress(const bip44_path_t* path);
 
 // policyForSignTxInit implements policy test for new transaction being signed.
-security_policy_t policyForSignTxInit();
+security_policy_t policyForSignTxInit(const bip44_path_t* path);
 
-// policyForSignTxOutputPath implements policy test for outgoing address path.
-security_policy_t policyForSignTxOutputPath(const bip44_path_t* path);
-
-// policyForGetPublicKey implements policy test for outgoing address validation on tx signing process.
-security_policy_t policyForSignTxOutputAddress(const uint8_t *addressBuffer, size_t addressSize);
-
-// policyForGetPublicKey implements policy test for transaction fee validation on tx signing process.
-security_policy_t policyForSignTxFee(uint64_t fee);
+// policyForSignTxFinalize implements policy test for transaction signature being provided.
+security_policy_t policyForSignTxFinalize();
 
 // ASSERT_NOT_DENIED tests given policy for denied status and throws
 // an exception if the action has indeed been denied.
