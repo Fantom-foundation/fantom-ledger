@@ -16,7 +16,7 @@ void ui_confirmPaginatedText() {
         ui_assertPaginatedTextGuard();
 
         // fire the callback to confirm end user finished reading the paginated text
-        paginated_text_state_t *ctx = paginatedTextState;
+        ui_paginated_text_state_t *ctx = paginatedTextState;
         ui_callbackConfirm(&ctx->callback);
     });
 }
@@ -85,7 +85,7 @@ void ui_confirmPrompt()
 
         // fire the corresponding call to process
         // user's acceptance of the course of action
-        prompt_state_t* ctx = promptState;
+        ui_prompt_state_t* ctx = promptState;
         ui_callbackConfirm(&ctx->callback);
     });
 }
@@ -99,7 +99,7 @@ void ui_rejectPrompt()
 
         // fire the corresponding call to process
         // user's rejection of the course of action
-        prompt_state_t* ctx = promptState;
+        ui_prompt_state_t* ctx = promptState;
         ui_callbackReject(&ctx->callback);
     });
 }

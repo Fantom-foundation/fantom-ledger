@@ -4,10 +4,11 @@
 #include "assert.h"
 #include "io.h"
 #include "utils.h"
+#include "address_utils.h"
 
 // displayState defines the common display state container shared between paginated text and prompt states.
 // We use this trick since only one of the two may happen at any time.
-display_state_t displayState;
+ui_display_state_t displayState;
 
 // G_ux is a magic global variable implicitly referenced by the UX_ macros.
 // Apps should never need to reference it directly.
@@ -27,6 +28,12 @@ void ui_assertPaginatedTextGuard() {
 // so we know the state is set for prompt.
 void ui_assertPromptGuard() {
     ASSERT(promptState->guard == UI_STATE_GUARD_PROMPT);
+}
+
+// ui_assertTxDetailsGuard implements verification of the shared state
+// so we know the state is set for transaction details.
+void ui_assertTxDetailsGuard() {
+    ASSERT(promptState->guard == UI_STATE_GUARD_TX_DETAIL);
 }
 
 // uiCallbackConfirm implements action callback for confirmed prompt.
@@ -91,8 +98,8 @@ void ui_displayPrompt(
         const char *headerStr,
         const char *bodyStr,
         ui_callback_fn_t *confirm,
-        ui_callback_fn_t *reject) {
-
+        ui_callback_fn_t *reject
+) {
     // get the text sizes so we can validate it will fit inside our reserved space
     size_t header_len = strlen(headerStr);
     size_t text_len = strlen(bodyStr);
@@ -103,7 +110,7 @@ void ui_displayPrompt(
 
     // clear all memory; use safe macro from utils.h
     MEMCLEAR(&displayState, displayState);
-    prompt_state_t *ctx = promptState;
+    ui_prompt_state_t *ctx = promptState;
 
     // copy strings from source to the state structure (including string terminator)
     os_memmove(ctx->header, headerStr, header_len + 1);
@@ -129,7 +136,8 @@ void ui_displayPrompt(
 void ui_displayPaginatedText(
         const char *headerStr,
         const char *bodyStr,
-        ui_callback_fn_t *callback) {
+        ui_callback_fn_t *callback
+) {
     // get the text size so we can validate the text fits inside reserved space
     size_t header_len = strlen(headerStr);
     size_t body_len = strlen(bodyStr);
@@ -140,7 +148,7 @@ void ui_displayPaginatedText(
 
     // clear the state memory; use safe macro from utils.h
     MEMCLEAR(&displayState, displayState);
-    paginated_text_state_t *ctx = paginatedTextState;
+    ui_paginated_text_state_t *ctx = paginatedTextState;
 
     // copy strings from source to the state structure (including string terminator)
     os_memmove(ctx->header, headerStr, header_len);
@@ -159,6 +167,45 @@ void ui_displayPaginatedText(
 
     // change the UX flow to configured paginated text
     ui_doDisplayPaginatedText();
+}
+
+// ui_displayTxDetails displays a prompt asking and user to decide the course of action.
+// The user can confirm, or reject the action and corresponding callback is fired
+// to pass the decision.
+// ui_displayTxDetails displays transaction details to end user asking to confirm
+// the transaction before being handled in any way (usually signed).
+void ui_displayTxDetails(
+        transaction_t *tx,
+        ui_callback_fn_t *confirm,
+        ui_callback_fn_t *reject
+) {
+    // clear all memory; use safe macro from utils.h
+    MEMCLEAR(&displayState, displayState);
+    ui_tx_details_state_t *ctx = txDetailsState;
+
+    // prepare transaction details for the display
+    // initialize the callback structure
+    ui_CallbackInit(&ctx->callback, confirm, reject);
+
+    // set the guard to mark the shared state as being used by the prompt now
+    ctx->guard = UI_STATE_GUARD_TX_DETAIL;
+
+    // validate the i/o state we are in and set it to waiting for user interaction
+    ASSERT(io_state == IO_EXPECT_NONE || io_state == IO_EXPECT_UI);
+    io_state = IO_EXPECT_UI;
+
+    // change the UX flow to the configured tx details screen
+    ui_doDisplayTxDetails()
+}
+
+// ui_displayBusy displays busy screen notifying end user that the device
+// is in the middle of processing stuff.
+void ui_displayBusy() {
+    // clear all memory; use safe macro from utils.h
+    MEMCLEAR(&displayState, displayState);
+
+    // change the UX flow to the configured busy screen
+    ui_doDisplayBusy();
 }
 
 // ui_respondWithUserReject implements sending rejection response
