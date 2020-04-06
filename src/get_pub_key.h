@@ -14,7 +14,7 @@ typedef struct {
     int16_t responseReady;
     bip44_path_t path;
     extended_public_key_t pubKey;
-    int ui_step;
+    int uiStep;
 } ins_get_ext_pubkey_context_t;
 
 #endif //FANTOM_LEDGER_GET_PUB_KEY_H

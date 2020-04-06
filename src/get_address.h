@@ -8,7 +8,7 @@
 // handleGetAddress implements Get Address APDU instruction handler.
 handler_fn_t handleGetAddress;
 
-// ins_get_address_context_t declares contact
+// ins_get_address_context_t declares context
 // for address derivation APDU instruction.
 typedef struct {
     uint16_t responseReady;
@@ -19,7 +19,7 @@ typedef struct {
         uint8_t buffer[64];
     } address;
     bool isShowAddress;
-    int ui_step;
+    int uiStep;
 } ins_get_address_context_t;
 
 #endif //FANTOM_LEDGER_GET_ADDRESS_H

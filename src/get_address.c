@@ -78,14 +78,14 @@ void handleGetAddress(
     switch (policy) {
         case POLICY_WARN:
             // warn about unusual address request
-            ctx->ui_step = UI_STEP_WARNING;
+            ctx->uiStep = UI_STEP_WARNING;
             break;
         case POLICY_PROMPT:
             // see runGetAddressUIStep comment below to get the right starting point
-            ctx->ui_step = (ctx->isShowAddress ? UI_STEP_ADDRESS : UI_STEP_CONFIRM);
+            ctx->uiStep = (ctx->isShowAddress ? UI_STEP_ADDRESS : UI_STEP_CONFIRM);
             break;
         case POLICY_ALLOW:
-            ctx->ui_step = UI_STEP_RESPOND;
+            ctx->uiStep = UI_STEP_RESPOND;
             break;
         default:
             // if no policy was set, terminate the action
@@ -106,7 +106,7 @@ static void runGetAddressUIStep() {
     ui_callback_fn_t *this_fn = runGetAddressUIStep;
 
     // resume the stage based on previous result
-    switch (ctx->ui_step) {
+    switch (ctx->uiStep) {
         case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
@@ -116,7 +116,7 @@ static void runGetAddressUIStep() {
             );
 
             // set next step
-            ctx->ui_step = UI_STEP_DISPLAY_PATH;
+            ctx->uiStep = UI_STEP_DISPLAY_PATH;
             break;
         }
 
@@ -133,7 +133,7 @@ static void runGetAddressUIStep() {
             );
 
             // set next step (check the comment above for the correct next step)
-            ctx->ui_step = (ctx->isShowAddress ? UI_STEP_ADDRESS : UI_STEP_CONFIRM);
+            ctx->uiStep = (ctx->isShowAddress ? UI_STEP_ADDRESS : UI_STEP_CONFIRM);
             break;
         }
 
@@ -153,7 +153,7 @@ static void runGetAddressUIStep() {
             );
 
             // set next step
-            ctx->ui_step = UI_STEP_RESPOND;
+            ctx->uiStep = UI_STEP_RESPOND;
             break;
         }
 
@@ -167,7 +167,7 @@ static void runGetAddressUIStep() {
             );
 
             // set next step
-            ctx->ui_step = UI_STEP_RESPOND;
+            ctx->uiStep = UI_STEP_RESPOND;
             break;
         }
 
@@ -183,7 +183,7 @@ static void runGetAddressUIStep() {
             ui_idle();
 
             // set invalid step so we never cycle around
-            ctx->ui_step = UI_STEP_INVALID;
+            ctx->uiStep = UI_STEP_INVALID;
             break;
         }
 

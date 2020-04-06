@@ -72,13 +72,13 @@ void handleGetPublicKey(
     // where on the UI scenario we start depends on the policy
     switch (policy) {
         case POLICY_WARN:
-            ctx->ui_step = UI_STEP_WARNING;
+            ctx->uiStep = UI_STEP_WARNING;
             break;
         case POLICY_PROMPT:
-            ctx->ui_step = UI_STEP_DISPLAY_PATH;
+            ctx->uiStep = UI_STEP_DISPLAY_PATH;
             break;
         case POLICY_ALLOW:
-            ctx->ui_step = UI_STEP_RESPOND;
+            ctx->uiStep = UI_STEP_RESPOND;
             break;
         default:
             // if no policy was set, terminate the action
@@ -95,7 +95,7 @@ static void runGetPublicKeyUIStep() {
     ui_callback_fn_t *this_fn = runGetPublicKeyUIStep;
 
     // resume the stage based on previous result
-    switch (ctx->ui_step) {
+    switch (ctx->uiStep) {
         case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
@@ -105,7 +105,7 @@ static void runGetPublicKeyUIStep() {
             );
 
             // set next step
-            ctx->ui_step = UI_STEP_DISPLAY_PATH;
+            ctx->uiStep = UI_STEP_DISPLAY_PATH;
             break;
         }
 
@@ -122,7 +122,7 @@ static void runGetPublicKeyUIStep() {
             );
 
             // set next step
-            ctx->ui_step = UI_STEP_CONFIRM;
+            ctx->uiStep = UI_STEP_CONFIRM;
             break;
         }
 
@@ -136,7 +136,7 @@ static void runGetPublicKeyUIStep() {
             );
 
             // set next step
-            ctx->ui_step = UI_STEP_RESPOND;
+            ctx->uiStep = UI_STEP_RESPOND;
             break;
         }
 
@@ -149,7 +149,7 @@ static void runGetPublicKeyUIStep() {
             ui_idle();
 
             // set invalid step so we never cycle around
-            ctx->ui_step = UI_STEP_INVALID;
+            ctx->uiStep = UI_STEP_INVALID;
             break;
         }
 
