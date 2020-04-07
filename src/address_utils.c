@@ -1,3 +1,13 @@
+/*******************************************************************************
+* Fantom Ledger App
+* (c) 2020 Fantom Foundation
+*
+* Some parts of the code are derived from Ledger Ethereum App distributed under
+* Apache License, Version 2.0. You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+********************************************************************************/
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -10,10 +20,6 @@
 
 // HEXDIGITS defines textual glyphs usable for address generation
 static const uint8_t const HEXDIGITS[] = "0123456789abcdef";
-
-// MASK defines masks for digits conversion for addresses with included checksums
-static const uint8_t const MASK[] = {0x80, 0x40, 0x20, 0x10,
-                                     0x08, 0x04, 0x02, 0x01};
 
 // deriveAddress implements address derivation for given BIP44 path.
 size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outputSize) {
@@ -76,30 +82,6 @@ size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, ui
     return 20;
 }
 
-// convertDigit implements single digit conversion with hash being applied
-// to the output address for extra safety.
-char convertDigit(uint8_t *address, uint8_t index, uint8_t *hash) {
-    // get next digit
-    unsigned char digit = address[index / 2];
-
-    // calculate the corresponding hexadecimal character involved
-    if ((index % 2) == 0) {
-        digit = (digit >> 4) & 0x0f;
-    } else {
-        digit = digit & 0x0f;
-    }
-
-    // if this is a letter digit, we check for hash application
-    if (digit > 9) {
-        unsigned char data = hash[index / 8];
-        if ((data & MASK[index % 8]) != 0) {
-            return HEXDIGITS[digit] - 'a' + 'A';
-        }
-    }
-
-    // number are left intact
-    return HEXDIGITS[digit];
-}
 
 // formatAddressStr implements formatting of a raw address into a human readable textual form.
 void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_t outputSize) {
@@ -108,19 +90,44 @@ void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
 
     // prep checksum buffer
     uint8_t hashChecksum[32];
-
-    // init SHA3 context
-    cx_keccak_init(sha3Context, 256);
-
-    // calculate SHA3 hash from the binary address so we can use it to mark checksum digits
-    cx_hash((cx_hash_t *) sha3Context, CX_LAST, address, 20, hashChecksum, 32);
-
-    // loop to convert address elements into the output string
+    uint8_t tmp[40];
     uint8_t i;
-    for (i = 0; i < 40; i++) {
-        out[i] = convertDigit(address, i, hashChecksum);
+
+    // prep base textual address representation (convert BYTE to HEX)
+    // so we can calculate SHA3 hash of the address and add folding checksum
+    for (i = 0; i < 20; i++) {
+        uint8_t digit = address[i];
+        tmp[2 * i] = HEXDIGITS[(digit >> 4) & 0x0f];
+        tmp[2 * i + 1] = HEXDIGITS[digit & 0x0f];
     }
 
-    // terminate the string
+    // calculate SHA3 hash of the address
+    cx_keccak_init(sha3Context, 256);
+    cx_hash((cx_hash_t *) sha3Context, CX_LAST, tmp, 40, hashChecksum, 32);
+
+    // parse address digits
+    for (i = 0; i < 40; i++) {
+        uint8_t digit = address[i / 2];
+        if ((i % 2) == 0) {
+            digit = (digit >> 4) & 0x0f;
+        } else {
+            digit = digit & 0x0f;
+        }
+
+        // do we need to fold?
+        if (digit >= 10) {
+            int v = (hashChecksum[i / 2] >> (4 * (1 - i % 2))) & 0x0f;
+            if (v >= 8) {
+                // fold the digit and continue with the loop
+                out[i] = HEXDIGITS[digit] - 'a' + 'A';
+                continue;
+            }
+        }
+
+        // simply copy the digit
+        out[i] = HEXDIGITS[digit];
+    }
+
+    // add address terminator
     out[40] = '\0';
 }
