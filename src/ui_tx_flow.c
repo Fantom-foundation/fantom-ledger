@@ -112,7 +112,7 @@ UX_STEP_CB(
 UX_FLOW(
     ux_tx_details_flow,
     &ux_tx_details_step_1,
-    &ux_tx_details_step_2,
+    // &ux_tx_details_step_2,
     &ux_tx_details_step_3,
     &ux_tx_details_step_4,
     &ux_tx_details_step_5,
