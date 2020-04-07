@@ -74,6 +74,9 @@ bool rlpCanDecode(uint8_t *buffer, uint32_t length, bool *isValid) {
 // It collects field length information from the field buffer and populates
 // some details about the field itself.
 bool rlpDecodeLength(uint8_t *buffer, uint32_t bufferLength, uint32_t *fieldLength, uint32_t *offset, bool *isList) {
+    // sanity check, we need to have at least single byte in the buffer
+    VALIDATE(length > 0, ERR_INVALID_DATA);
+
     // decide what to do based on the buffer content
     if (*buffer <= 0x7f) {
         // this is the value itself, no decoding needed
@@ -92,15 +95,31 @@ bool rlpDecodeLength(uint8_t *buffer, uint32_t bufferLength, uint32_t *fieldLeng
         *isList = false;
         switch (*buffer) {
             case 0xb8:
+                // sanity check, we need to have at least two bytes in the buffer
+                VALIDATE(length > 1, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = *(buffer + 1);
                 break;
             case 0xb9:
+                // sanity check, we need to have at least three bytes in the buffer
+                VALIDATE(length > 2, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = (*(buffer + 1) << 8) + *(buffer + 2);
                 break;
             case 0xba:
+                // sanity check, we need to have at least four bytes in the buffer
+                VALIDATE(length > 3, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = (*(buffer + 1) << 16) + (*(buffer + 2) << 8) + *(buffer + 3);
                 break;
             case 0xbb:
+                // sanity check, we need to have at least five bytes in the buffer
+                VALIDATE(length > 4, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = (*(buffer + 1) << 24) + (*(buffer + 2) << 16) +
                                (*(buffer + 3) << 8) + *(buffer + 4);
                 break;
@@ -120,15 +139,31 @@ bool rlpDecodeLength(uint8_t *buffer, uint32_t bufferLength, uint32_t *fieldLeng
         *isList = true;
         switch (*buffer) {
             case 0xf8:
+                // sanity check, we need to have at least two bytes in the buffer
+                VALIDATE(length > 1, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = *(buffer + 1);
                 break;
             case 0xf9:
+                // sanity check, we need to have at least three bytes in the buffer
+                VALIDATE(length > 2, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = (*(buffer + 1) << 8) + *(buffer + 2);
                 break;
             case 0xfa:
+                // sanity check, we need to have at least four bytes in the buffer
+                VALIDATE(length > 3, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = (*(buffer + 1) << 16) + (*(buffer + 2) << 8) + *(buffer + 3);
                 break;
             case 0xfb:
+                // sanity check, we need to have at least five bytes in the buffer
+                VALIDATE(length > 4, ERR_INVALID_DATA);
+
+                // get the length
                 *fieldLength = (*(buffer + 1) << 24) + (*(buffer + 2) << 16) +
                                (*(buffer + 3) << 8) + *(buffer + 4);
                 break;
