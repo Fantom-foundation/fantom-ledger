@@ -7,6 +7,7 @@
 #include "big_endian_io.h"
 #include "address_utils.h"
 #include "ui_helpers.h"
+#include "tx_stream.h"
 #include "bip44.h"
 
 // ctx keeps local reference to the transaction signature building context
@@ -150,6 +151,25 @@ static void handleSignTxCollect(uint8_t p2, uint8_t *wireBuffer, size_t wireSize
 
     // validate we received at least some data from remote host
     VALIDATE(wireSize >= 1, ERR_INVALID_DATA);
+
+    // process the wire buffer with the tx stream
+    tx_stream_status_e status = txStreamProcess(ctx->stream, wireBuffer, wireSize, 0);
+    switch (status) {
+        case TX_STREAM_PROCESSING:
+            // the stream is waiting for additional data
+            // nothing to do here
+            break;
+        case TX_STREAM_FINISHED:
+            // the stream finished and we expect the next stage
+            ctx->stage = SIGN_STAGE_FINALIZE;
+            break;
+        case TX_STREAM_FAULT:
+            // reset the context, the stream failed
+            // because the incoming data were incorrect
+        default:
+            // reset the context, the stream is in unknown state
+            VALIDATE(false, ERR_INVALID_DATA);
+    }
 
     // respond to the host to continue sending data
     io_send_buf(SUCCESS, NULL, 0);

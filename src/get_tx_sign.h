@@ -1,9 +1,12 @@
 #ifndef FANTOM_LEDGER_GET_TX_SIGN_H
 #define FANTOM_LEDGER_GET_TX_SIGN_H
 
+#include "os.h"
+#include "cx.h"
 #include "common.h"
 #include "handlers.h"
 #include "transaction.h"
+#include "tx_stream.h"
 
 // handleSignTransaction implements Sign Transaction APDU instruction handler.
 handler_fn_t handleSignTransaction;
@@ -19,6 +22,8 @@ typedef enum {
 // for transaction signature building APDU instruction
 typedef struct {
     transaction_t tx;
+    tx_stream_context_t stream;
+    cx_sha3_t sha3Context;
     tx_stage_t stage;
     int uiStep;
 } ins_sign_tx_context_t;
