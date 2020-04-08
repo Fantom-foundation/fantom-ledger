@@ -92,7 +92,7 @@ UX_STEP_CB(
     ITEMS(
         &C_icon_validate_14,
         "Send",
-        "transaction",
+        "transaction?",
     )
 );
 
@@ -104,7 +104,7 @@ UX_STEP_CB(
     ITEMS(
         &C_icon_crossmark,
         "Reject",
-        "transaction",
+        "transaction?",
     )
 );
 
