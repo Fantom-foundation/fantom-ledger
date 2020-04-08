@@ -12,8 +12,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "os.h"
-#include "cx.h"
 #include "utils.h"
 #include "derive_key.h"
 #include "address_utils.h"
