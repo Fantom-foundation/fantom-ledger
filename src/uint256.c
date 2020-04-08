@@ -19,41 +19,41 @@
 static const char HEXDIGITS[] = "0123456789abcdef";
 
 // isZero128 implements test if given 128 bit value is zero.
-static bool isZero128(uint128_t *number) {
+bool isZero128(uint128_t *number) {
     return ((LOWER_P(number) == 0) && (UPPER_P(number) == 0));
 }
 
 // isZero256 implements a test if given 256 bit value is zero.
-static bool isZero256(uint256_t *number) {
-    return (zero128(&LOWER_P(number)) && zero128(&UPPER_P(number)));
+bool isZero256(uint256_t *number) {
+    return (isZero128(&LOWER_P(number)) && isZero128(&UPPER_P(number)));
 }
 
 // copy128 implements copying between source and destination 128 bit numbers.
-static void copy128(uint128_t *target, uint128_t *number) {
+void copy128(uint128_t *target, uint128_t *number) {
     UPPER_P(target) = UPPER_P(number);
     LOWER_P(target) = LOWER_P(number);
 }
 
 // copy256 implements copying between source and destination 256 bit numbers.
-static void copy256(uint256_t *target, uint256_t *number) {
+void copy256(uint256_t *target, uint256_t *number) {
     copy128(&UPPER_P(target), &UPPER_P(number));
     copy128(&LOWER_P(target), &LOWER_P(number));
 }
 
 // clear128 implements setting given target 128 bit number to zero.
-static void clear128(uint128_t *target) {
+void clear128(uint128_t *target) {
     UPPER_P(target) = 0;
     LOWER_P(target) = 0;
 }
 
 // clear256 implements setting given target 256 bit number to zero.
-static void clear256(uint256_t *target) {
+void clear256(uint256_t *target) {
     clear128(&UPPER_P(target));
     clear128(&LOWER_P(target));
 }
 
 // shiftLeft128 implements left shifting of a 128 bit number.
-static void shiftLeft128(uint128_t *number, uint32_t value, uint128_t *target) {
+void shiftLeft128(uint128_t *number, uint32_t value, uint128_t *target) {
     if (value >= 128) {
         clear128(target);
     } else if (value == 64) {
@@ -74,7 +74,7 @@ static void shiftLeft128(uint128_t *number, uint32_t value, uint128_t *target) {
 }
 
 // shiftLeft256 implements left shifting of a 256 bit number.
-static void shiftLeft256(uint256_t *number, uint32_t value, uint256_t *target) {
+void shiftLeft256(uint256_t *number, uint32_t value, uint256_t *target) {
     if (value >= 256) {
         clear256(target);
     } else if (value == 128) {
@@ -100,7 +100,7 @@ static void shiftLeft256(uint256_t *number, uint32_t value, uint256_t *target) {
 }
 
 // shiftRight128 implements right shifting of a 128 bit number.
-static void shiftRight128(uint128_t *number, uint32_t value, uint128_t *target) {
+void shiftRight128(uint128_t *number, uint32_t value, uint128_t *target) {
     if (value >= 128) {
         clear128(target);
     } else if (value == 64) {
@@ -123,7 +123,7 @@ static void shiftRight128(uint128_t *number, uint32_t value, uint128_t *target) 
 }
 
 // shiftRight256 implements right shifting of a 256 bit number.
-static void shiftRight256(uint256_t *number, uint32_t value, uint256_t *target) {
+void shiftRight256(uint256_t *number, uint32_t value, uint256_t *target) {
     if (value >= 256) {
         clear256(target);
     } else if (value == 128) {
@@ -149,7 +149,7 @@ static void shiftRight256(uint256_t *number, uint32_t value, uint256_t *target) 
 }
 
 // bits128 implements bit transfer of a 128 bit number.
-static uint32_t bits128(uint128_t *number) {
+uint32_t bits128(uint128_t *number) {
     uint32_t result = 0;
     if (UPPER_P(number)) {
         result = 64;
@@ -169,20 +169,20 @@ static uint32_t bits128(uint128_t *number) {
 }
 
 // bits256 implements bit transfer of a 256 bit number.
-static uint32_t bits256(uint256_t *number) {
+uint32_t bits256(uint256_t *number) {
     uint32_t result = 0;
-    if (!zero128(&UPPER_P(number))) {
+    if (!isZero128(&UPPER_P(number))) {
         result = 128;
         uint128_t up;
         copy128(&up, &UPPER_P(number));
-        while (!zero128(&up)) {
+        while (!isZero128(&up)) {
             shiftRight128(&up, 1, &up);
             result++;
         }
     } else {
         uint128_t low;
         copy128(&low, &LOWER_P(number));
-        while (!zero128(&low)) {
+        while (!isZero128(&low)) {
             shiftRight128(&low, 1, &low);
             result++;
         }
@@ -191,19 +191,19 @@ static uint32_t bits256(uint256_t *number) {
 }
 
 // equal128 tests if two 128 bit numbers are equal.
-static bool equal128(uint128_t *number1, uint128_t *number2) {
+bool equal128(uint128_t *number1, uint128_t *number2) {
     return (UPPER_P(number1) == UPPER_P(number2)) &&
            (LOWER_P(number1) == LOWER_P(number2));
 }
 
 // equal256 tests if two 256 bit numbers are equal.
-static bool equal256(uint256_t *number1, uint256_t *number2) {
+bool equal256(uint256_t *number1, uint256_t *number2) {
     return (equal128(&UPPER_P(number1), &UPPER_P(number2)) &&
             equal128(&LOWER_P(number1), &LOWER_P(number2)));
 }
 
 // gt128 tests if first 128 bit number is greater than the last.
-static bool gt128(uint128_t *number1, uint128_t *number2) {
+bool gt128(uint128_t *number1, uint128_t *number2) {
     if (UPPER_P(number1) == UPPER_P(number2)) {
         return (LOWER_P(number1) > LOWER_P(number2));
     }
@@ -211,7 +211,7 @@ static bool gt128(uint128_t *number1, uint128_t *number2) {
 }
 
 // gt256 tests if first 256 bit number is greater than the last.
-static bool gt256(uint256_t *number1, uint256_t *number2) {
+bool gt256(uint256_t *number1, uint256_t *number2) {
     if (equal128(&UPPER_P(number1), &UPPER_P(number2))) {
         return gt128(&LOWER_P(number1), &LOWER_P(number2));
     }
@@ -219,17 +219,17 @@ static bool gt256(uint256_t *number1, uint256_t *number2) {
 }
 
 // gt128 tests if first 128 bit number is greater than the last or if they are equal.
-static bool gte128(uint128_t *number1, uint128_t *number2) {
+bool gte128(uint128_t *number1, uint128_t *number2) {
     return gt128(number1, number2) || equal128(number1, number2);
 }
 
 // gt256 tests if first 256 bit number is greater than the last or if they are equal.
-static bool gte256(uint256_t *number1, uint256_t *number2) {
+bool gte256(uint256_t *number1, uint256_t *number2) {
     return gt256(number1, number2) || equal256(number1, number2);
 }
 
 // add128 implements adding two 128 bit numbers together.
-static void add128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
+void add128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
     UPPER_P(target) =
             UPPER_P(number1) + UPPER_P(number2) +
             ((LOWER_P(number1) + LOWER_P(number2)) < LOWER_P(number1));
@@ -237,7 +237,7 @@ static void add128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
 }
 
 // add256 implements adding two 256 bit numbers together.
-static void add256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
+void add256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
     uint128_t tmp;
     add128(&UPPER_P(number1), &UPPER_P(number2), &UPPER_P(target));
     add128(&LOWER_P(number1), &LOWER_P(number2), &tmp);
@@ -251,7 +251,7 @@ static void add256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
 }
 
 // minus128 implements subtracting last 256 bit number from the first one.
-static void minus128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
+void minus128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
     UPPER_P(target) =
             UPPER_P(number1) - UPPER_P(number2) -
             ((LOWER_P(number1) - LOWER_P(number2)) > LOWER_P(number1));
@@ -259,7 +259,7 @@ static void minus128(uint128_t *number1, uint128_t *number2, uint128_t *target) 
 }
 
 // minus256 implements subtracting last 256 bit number from the first one.
-static void minus256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
+void minus256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
     uint128_t tmp;
     minus128(&UPPER_P(number1), &UPPER_P(number2), &UPPER_P(target));
     minus128(&LOWER_P(number1), &LOWER_P(number2), &tmp);
@@ -273,19 +273,19 @@ static void minus256(uint256_t *number1, uint256_t *number2, uint256_t *target) 
 }
 
 // or128 implements logical superposition of two 128 bit numbers.
-static void or128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
+void or128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
     UPPER_P(target) = UPPER_P(number1) | UPPER_P(number2);
     LOWER_P(target) = LOWER_P(number1) | LOWER_P(number2);
 }
 
 // or256 implements logical superposition of two 256 bit numbers.
-static void or256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
+void or256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
     or128(&UPPER_P(number1), &UPPER_P(number2), &UPPER_P(target));
     or128(&LOWER_P(number1), &LOWER_P(number2), &LOWER_P(target));
 }
 
 // mul128 implements multiplication of two 128 bit numbers.
-static void mul128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
+void mul128(uint128_t *number1, uint128_t *number2, uint128_t *target) {
     uint64_t top[4] = {UPPER_P(number1) >> 32, UPPER_P(number1) & 0xffffffff,
                        LOWER_P(number1) >> 32, LOWER_P(number1) & 0xffffffff};
     uint64_t bottom[4] = {UPPER_P(number2) >> 32, UPPER_P(number2) & 0xffffffff,
@@ -423,8 +423,8 @@ void mul256(uint256_t *number1, uint256_t *number2, uint256_t *target) {
 }
 
 // divMod128 implements division with modulo of two 128 bit numbers.
-static void divMod128(uint128_t *l, uint128_t *r, uint128_t *retDiv,
-                      uint128_t *retMod
+void divMod128(uint128_t *l, uint128_t *r, uint128_t *retDiv,
+               uint128_t *retMod
 ) {
     uint128_t copyD, adder, resDiv, resMod;
     uint128_t one;
@@ -457,7 +457,7 @@ static void divMod128(uint128_t *l, uint128_t *r, uint128_t *retDiv,
 }
 
 // divMod256 implements division with modulo of two 256 bit numbers.
-static void divMod256(uint256_t *l, uint256_t *r, uint256_t *retDiv, uint256_t *retMod) {
+void divMod256(uint256_t *l, uint256_t *r, uint256_t *retDiv, uint256_t *retMod) {
     uint256_t copyD, adder, resDiv, resMod;
     uint256_t one;
     clear256(&one);
@@ -490,7 +490,7 @@ static void divMod256(uint256_t *l, uint256_t *r, uint256_t *retDiv, uint256_t *
 }
 
 // stringReverse implements reversing of a string in a buffer.
-static void stringReverse(char *str, size_t length) {
+void stringReverse(char *str, size_t length) {
     uint32_t i, j;
     for (i = 0, j = length - 1; i < j; i++, j--) {
         uint8_t c;
@@ -501,7 +501,7 @@ static void stringReverse(char *str, size_t length) {
 }
 
 // uint256ConvertBE implements conversion from array of 8 bit values to uint256.
-void uint256ConvertBE(const uint256_t *out, const uint8_t *data, size_t length) {
+void uint256ConvertBE(uint256_t *out, const uint8_t *data, size_t length) {
     // make sure the data is within reasonable length
     VALIDATE(length <= 32, ERR_ASSERT);
 
@@ -514,7 +514,7 @@ void uint256ConvertBE(const uint256_t *out, const uint8_t *data, size_t length) 
     os_memmove(tmp + 32 - length, data, length);
 
     // read in the 256 bit value
-    readUint256BE(target, tmp, sizeof(tmp));
+    readUint256BE(out, tmp, sizeof(tmp));
 }
 
 // uint256ToString implements conversion of 256 bit unsigned integer to a string.
@@ -524,7 +524,7 @@ size_t uint256ToString(uint256_t *number, uint32_t baseParam, char *out, size_t 
     uint256_t base;
 
     // validate the base is reasonable
-    VALIDATE((baseParam = > 2) && (baseParam <= 16), ERR_ASSERT);
+    VALIDATE((baseParam >= 2) && (baseParam <= 16), ERR_ASSERT);
 
     // init state
     copy256(&rDiv, number);
@@ -559,7 +559,7 @@ size_t uint256ToString(uint256_t *number, uint32_t baseParam, char *out, size_t 
 
 
 // readUint64BE implements reading of big endian uint64 value from given buffer
-static uint64_t readUint64BE(const uint8_t *buffer) {
+uint64_t readUint64BE(const uint8_t *buffer) {
     return (((uint64_t) buffer[0]) << 56) | (((uint64_t) buffer[1]) << 48) |
            (((uint64_t) buffer[2]) << 40) | (((uint64_t) buffer[3]) << 32) |
            (((uint64_t) buffer[4]) << 24) | (((uint64_t) buffer[5]) << 16) |
@@ -567,7 +567,7 @@ static uint64_t readUint64BE(const uint8_t *buffer) {
 }
 
 // readUint128BE implements reading big endian 128 bit value from the given buffer.
-void readUint128BE(const uint256_t *target, const uint8_t *buffer, size_t length) {
+void readUint128BE(uint128_t *target, const uint8_t *buffer, size_t length) {
     // make sure the buffer size is what we expect
     VALIDATE(length >= 16, ERR_ASSERT);
 
@@ -577,7 +577,7 @@ void readUint128BE(const uint256_t *target, const uint8_t *buffer, size_t length
 }
 
 // readUint256BE implements reading big endian 256 bit value from the given buffer
-void readUint256BE(const uint256_t *target, const uint8_t *buffer, size_t length) {
+void readUint256BE(uint256_t *target, const uint8_t *buffer, size_t length) {
     // make sure the buffer size is what we expect
     VALIDATE(length >= 32, ERR_ASSERT);
 
