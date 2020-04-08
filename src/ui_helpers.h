@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "transaction.h"
 
 // MAX_SIMPLE_TEXT_LENGTH defines the maximal length of a text
 // which can be displayed on a single screen on Ledger Nano devices.
@@ -50,25 +51,12 @@ typedef struct {
     ui_callback_t callback;
 } ui_prompt_state_t;
 
-// ui_tx_details_state_t declares a state of transaction detail asking for end user
-// for confirmation of a transaction described by the state. We do so before allowing
-// the device to sign the transaction with a derived key.
-typedef struct {
-    uint16_t guard;
-    char from[43];
-    char to[43];
-    char amount[50];
-    char fee[50];
-    ui_callback_t callback;
-} ui_tx_details_state_t;
-
 // ui_display_state_t merges both types of "display text & wait for decision" state together
 // in a single union. We never need both so we re-use the structure to save some space.
 // Notice the guard is on the beginning of both structures and so will always align the same way.
 typedef union {
     ui_paginated_text_state_t paginatedText;
     ui_prompt_state_t prompt;
-    ui_tx_details_state_t txDetails;
 } ui_display_state_t;
 
 // ui_idle implements transaction to idle state
@@ -95,7 +83,6 @@ void ui_displayPrompt(
 // ui_displayTxDetails displays transaction details to end user asking to confirm
 // the transaction before being handled in any way (usually signed).
 void ui_displayTxDetails(
-        transaction_t *tx,
         ui_callback_fn_t *confirm,
         ui_callback_fn_t *reject);
 
@@ -108,10 +95,6 @@ void ui_doDisplayPrompt();
 
 // ui_doDisplayPaginatedText implements actual change in UX flow to show the configured paginated text.
 void ui_doDisplayPaginatedText();
-
-// ui_doDisplayTxDetails implements actual change in UX flow to show the configured
-// transaction details interaction.
-void ui_doDisplayTxDetails();
 
 // ui_doDisplayBusy implements actual change in UX flow to show the busy screen.
 void ui_doDisplayBusy();
@@ -130,10 +113,6 @@ void ui_assertPaginatedTextGuard();
 // so we know the state is set for prompt.
 void ui_assertPromptGuard();
 
-// ui_assertTxDetailsGuard implements verification of the shared state
-// so we know the state is set for transaction details.
-void ui_assertTxDetailsGuard();
-
 // ui_respondWithUserReject implements sending rejection response
 // to host and resetting current instruction from being processed
 // any further.
@@ -146,7 +125,6 @@ extern ui_display_state_t displayState;
 // keep references to internal type specific states inside the shared state.
 static ui_paginated_text_state_t *paginatedTextState = &(displayState.paginatedText);
 static ui_prompt_state_t *promptState = &(displayState.prompt);
-static ui_tx_details_state_t *txDetailsState = &(displayState.txDetails);
 
 // what guards we use for the shared state
 enum {
