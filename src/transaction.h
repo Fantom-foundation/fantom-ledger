@@ -1,6 +1,8 @@
 #ifndef FANTOM_LEDGER_TRANSACTION_H
 #define FANTOM_LEDGER_TRANSACTION_H
 
+#include "bip44.h"
+
 #define TX_HASH_LENGTH 32
 #define TX_SIGNATURE_HASH_LENGTH 32
 #define TX_MAX_INT256_LENGTH 32
@@ -47,16 +49,16 @@ uint32_t txGetV(const transaction_t *tx);
 
 // txGetSignature implements ECDSA signature calculation of a transaction hash.
 void txGetSignature(
-        const tx_signature_t *signature,
+        tx_signature_t *signature,
         const bip44_path_t *path,
         const uint8_t *hash,
         size_t hashLength
 );
 
 // txGetFormattedAmount creates human readable string representation of given int256 amount/value converted to FTM.
-void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, const char *out, size_t outSize);
+void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, char *out, size_t outSize);
 
 // txGetFormattedFee calculates the transaction fee and formats it to human readable FTM value.
-void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, const char *out, size_t outSize);
+void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, char *out, size_t outSize);
 
 #endif //FANTOM_LEDGER_TRANSACTION_H

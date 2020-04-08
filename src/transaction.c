@@ -43,7 +43,7 @@ uint32_t txGetV(const transaction_t *tx) {
 
 // txGetSignature implements ECDSA signature calculation of a transaction hash.
 void txGetSignature(
-        const tx_signature_t *signature,
+        tx_signature_t *signature,
         const bip44_path_t *path,
         const uint8_t *hash,
         size_t hashLength
@@ -129,8 +129,13 @@ void txGetSignature(
 
 // adjustDecimals adjust decimal places for the given decimal number.
 // We use it to convert amounts from WEI to FTM units.
-static size_t
-adjustDecimals(const char *src, uint32_t srcLength, uint8_t decimals, const char *target, size_t targetLength) {
+static size_t adjustDecimals(
+        const char *src,
+        uint32_t srcLength,
+        uint8_t decimals,
+        char *target,
+        size_t targetLength
+) {
     // we need at least some space to convert
     VALIDATE(targetLength > 2, ERR_INVALID_DATA);
 
@@ -226,7 +231,7 @@ adjustDecimals(const char *src, uint32_t srcLength, uint8_t decimals, const char
 }
 
 // txGetFormattedAmount creates human readable string representation of given int256 amount/value converted to FTM.
-void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, const char *out, size_t outSize) {
+void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, char *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this size
     ASSERT(outSize < MAX_BUFFER_SIZE);
 
@@ -236,7 +241,7 @@ void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, const char
 
     // convert the value to decimal string
     char tmp[64];
-    size_t length = uint256ToString(&tmpValue, 10, &tmp, sizeof(tmp));
+    size_t length = uint256ToString(&tmpValue, 10, (char *) &tmp, sizeof(tmp));
 
     // make sure we have any number here
     VALIDATE(length > 0, ERR_INVALID_DATA);
@@ -246,7 +251,7 @@ void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, const char
 }
 
 // txGetFormattedFee calculates the transaction fee and formats it to human readable FTM value.
-void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, const char *out, size_t outSize) {
+void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, char *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this size
     ASSERT(outSize < MAX_BUFFER_SIZE);
 
@@ -262,7 +267,7 @@ void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, const char *ou
 
     // convert the value to decimal string
     char tmp[64];
-    size_t length = uint256ToString(&fee, 10, &tmp, sizeof(tmp));
+    size_t length = uint256ToString(&fee, 10, (char *) &tmp, sizeof(tmp));
 
     // make sure we have any number here
     VALIDATE(length > 0, ERR_INVALID_DATA);
