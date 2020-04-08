@@ -88,6 +88,9 @@ void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
     // make sanity check, the buffer may never exceed this number
     ASSERT(outputSize < MAX_BUFFER_SIZE);
 
+    // make sure the address will fit inside the buffer
+    VALIDATE(outputSize >= MIN_ADDRESS_STR_BUFFER_SIZE, ERR_ASSERT);
+
     // prep checksum buffer
     uint8_t hashChecksum[32];
     uint8_t tmp[40];
@@ -119,15 +122,17 @@ void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
             int v = (hashChecksum[i / 2] >> (4 * (1 - i % 2))) & 0x0f;
             if (v >= 8) {
                 // fold the digit and continue with the loop
-                out[i] = HEXDIGITS[digit] - 'a' + 'A';
+                out[i + 2] = HEXDIGITS[digit] - 'a' + 'A';
                 continue;
             }
         }
 
         // simply copy the digit
-        out[i] = HEXDIGITS[digit];
+        out[i + 2] = HEXDIGITS[digit];
     }
 
-    // add address terminator
-    out[40] = '\0';
+    // add address prefix and terminator
+    out[0] = '0';
+    out[1] = 'x';
+    out[43] = '\0';
 }
