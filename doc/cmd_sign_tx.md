@@ -26,9 +26,9 @@ We use 3 types of APDU blocks to communicate during the signing process.
 
 **Initialize Transaction Signing block**
  
-| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |   *Le*   |
-|-------|-------|------|------|----------|----------|
-|  0xE0 |  0x20 | 0x00 | 0x00 | variable |   0x00   |
+| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |
+|-------|-------|------|------|----------|
+|  0xE0 |  0x20 | 0x00 | 0x00 | variable |
 
 Data payload of the first transaction block contains BIP32 derivations setup. This will allow to construct source
 address.
@@ -39,9 +39,9 @@ address.
 
 **Transaction Details block**
 
-| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |   *Le*   |
-|-------|-------|------|------|----------|----------|
-|  0xE0 |  0x20 | 0x01 | 0x00 | variable |   0x00   |
+| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |
+|-------|-------|------|------|----------|
+|  0xE0 |  0x20 | 0x01 | 0x00 | variable |
 
 Data payload of the subsequent transaction block container is RLP encoded transaction data.
 
@@ -51,9 +51,9 @@ Data payload of the subsequent transaction block container is RLP encoded transa
 
 **Final Confirmation block**
 
-| *CLA* | *INS* | *P1* | *P2* | *Lc* |   *Le*   |
-|-------|-------|------|------|------|----------|
-|  0xE0 |  0x20 | 0x80 | 0x00 | 0x00 | variable |
+| *CLA* | *INS* | *P1* | *P2* | *Lc* |
+|-------|-------|------|------|------|
+|  0xE0 |  0x20 | 0x80 | 0x00 | 0x00 |
 
 #### Response Payload
 
