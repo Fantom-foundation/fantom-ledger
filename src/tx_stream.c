@@ -109,12 +109,12 @@ static void txStreamProcessContent(tx_stream_context_t *ctx) {
     // advance expected field processing to the next one
     // see tx_stream.h for list of expected tx fields
     ctx->currentField++;
-    ctx->processingField = false;
+    ctx->isProcessingField = false;
 }
 
-// txStreamProcessField implements transaction field processing.
+// txStreamProcessInt256Field implements transaction field processing.
 // If the field is NULL the data is actually not stored and are thrown away.
-static void txStreamProcessField(tx_stream_context_t *ctx, tx_int256_t *field, uint32_t fieldSize) {
+static void txStreamProcessInt256Field(tx_stream_context_t *ctx, tx_int256_t *field, uint32_t fieldSize) {
     // the field must not be marked as a list of values, it's a single value
     VALIDATE(!ctx->isCurrentFieldList, ERR_INVALID_DATA);
 
@@ -130,7 +130,7 @@ static void txStreamProcessField(tx_stream_context_t *ctx, tx_int256_t *field, u
         // copy into the target field, or throw away the data and just move to the next element?
         if (field != NULL) {
             // copy data to target field on the correct position
-            txStreamCopyData(ctx, field.value + ctx->currentFieldPos, toCopy);
+            txStreamCopyData(ctx, field->value + ctx->currentFieldPos, toCopy);
         } else {
             // just throw the data
             txStreamCopyData(ctx, NULL, toCopy);
@@ -147,9 +147,88 @@ static void txStreamProcessField(tx_stream_context_t *ctx, tx_int256_t *field, u
 
         // advance the field
         ctx->currentField++;
-        ctx->processingField = false;
+        ctx->isProcessingField = false;
     }
 }
+
+// txStreamProcessAddressField implements transaction field processing.
+// If the field is NULL the data is actually not stored and are thrown away.
+static void txStreamProcessAddressField(tx_stream_context_t *ctx, tx_address_t *address, uint32_t fieldSize) {
+    // the field must not be marked as a list of values, it's a single value
+    VALIDATE(!ctx->isCurrentFieldList, ERR_INVALID_DATA);
+
+    // make sure the length is appropriate; it has to fit in the provided buffer
+    VALIDATE(ctx->currentFieldLength <= fieldSize, ERR_INVALID_DATA);
+
+    // are we safely inside the field length?
+    if (ctx->currentFieldPos < ctx->currentFieldLength) {
+        // determine the length of skip we need to make
+        uint32_t toCopy = (ctx->commandLength < (ctx->currentFieldLength - ctx->currentFieldPos) ?
+                           ctx->commandLength : ctx->currentFieldLength - ctx->currentFieldPos);
+
+        // copy into the target field, or throw away the data and just move to the next element?
+        if (address != NULL) {
+            // copy data to target field on the correct position
+            txStreamCopyData(ctx, address->value + ctx->currentFieldPos, toCopy);
+        } else {
+            // just throw the data
+            txStreamCopyData(ctx, NULL, toCopy);
+        }
+    }
+
+    // are we done with the field?
+    // if so, move processing to the next field
+    if (ctx->currentFieldPos == ctx->currentFieldLength) {
+        // set the field real size if any
+        if (address != NULL) {
+            address->length = ctx->currentFieldLength;
+        }
+
+        // advance the field
+        ctx->currentField++;
+        ctx->isProcessingField = false;
+    }
+}
+
+// txStreamProcessVField implements transaction V field processing.
+// If the field is NULL the data is actually not stored and are thrown away.
+static void txStreamProcessVField(tx_stream_context_t *ctx, tx_v_t *v, uint32_t fieldSize) {
+    // the field must not be marked as a list of values, it's a single value
+    VALIDATE(!ctx->isCurrentFieldList, ERR_INVALID_DATA);
+
+    // make sure the length is appropriate; it has to fit in the provided buffer
+    VALIDATE(ctx->currentFieldLength <= fieldSize, ERR_INVALID_DATA);
+
+    // are we safely inside the field length?
+    if (ctx->currentFieldPos < ctx->currentFieldLength) {
+        // determine the length of skip we need to make
+        uint32_t toCopy = (ctx->commandLength < (ctx->currentFieldLength - ctx->currentFieldPos) ?
+                           ctx->commandLength : ctx->currentFieldLength - ctx->currentFieldPos);
+
+        // copy into the target field, or throw away the data and just move to the next element?
+        if (v != NULL) {
+            // copy data to target field on the correct position
+            txStreamCopyData(ctx, v->value + ctx->currentFieldPos, toCopy);
+        } else {
+            // just throw the data
+            txStreamCopyData(ctx, NULL, toCopy);
+        }
+    }
+
+    // are we done with the field?
+    // if so, move processing to the next field
+    if (ctx->currentFieldPos == ctx->currentFieldLength) {
+        // set the field real size if any
+        if (v != NULL) {
+            v->length = ctx->currentFieldLength;
+        }
+
+        // advance the field
+        ctx->currentField++;
+        ctx->isProcessingField = false;
+    }
+}
+
 
 // txStreamParseFieldProxy implements current field parsing proxy.
 static tx_stream_status_e txStreamParseFieldProxy(tx_stream_context_t *ctx) {
@@ -168,32 +247,32 @@ static tx_stream_status_e txStreamParseFieldProxy(tx_stream_context_t *ctx) {
         case TX_RLP_TYPE:
             // we don't keep the type, but we do run parse on it since
             // all the incoming data participate on SHA3 hash building
-            txStreamProcessField(ctx, NULL, TX_MAX_INT256_LENGTH);
+            txStreamProcessInt256Field(ctx, NULL, TX_MAX_INT256_LENGTH);
             break;
         case TX_RLP_NONCE:
             // we don't keep the sender's address nonce
-            txStreamProcessField(ctx, NULL, TX_MAX_INT256_LENGTH);
+            txStreamProcessInt256Field(ctx, NULL, TX_MAX_INT256_LENGTH);
             break;
         case TX_RLP_GAS_PRICE:
-            txStreamProcessField(ctx, &ctx->tx->gasPrice, TX_MAX_INT256_LENGTH);
+            txStreamProcessInt256Field(ctx, &ctx->tx->gasPrice, TX_MAX_INT256_LENGTH);
             break;
         case TX_RLP_START_GAS:
-            txStreamProcessField(ctx, &ctx->tx->startGas, TX_MAX_INT256_LENGTH);
+            txStreamProcessInt256Field(ctx, &ctx->tx->startGas, TX_MAX_INT256_LENGTH);
             break;
         case TX_RLP_VALUE:
-            txStreamProcessField(ctx, &ctx->tx->value, TX_MAX_INT256_LENGTH);
+            txStreamProcessInt256Field(ctx, &ctx->tx->value, TX_MAX_INT256_LENGTH);
             break;
         case TX_RLP_RECIPIENT:
-            txStreamProcessField(ctx, &ctx->tx->recipient, TX_MAX_ADDRESS_LENGTH);
+            txStreamProcessAddressField(ctx, &ctx->tx->recipient, TX_MAX_ADDRESS_LENGTH);
             break;
         case TX_RLP_DATA:
         case TX_RLP_R:
         case TX_RLP_S:
             // those fields can be arbitrary and we don't track their size
-            txStreamProcessField(ctx, NULL, MAX_BUFFER_SIZE);
+            txStreamProcessInt256Field(ctx, NULL, MAX_BUFFER_SIZE);
             break;
         case TX_RLP_V:
-            txStreamProcessField(ctx, &ctx->tx->v, TX_MAX_INT256_LENGTH);
+            txStreamProcessVField(ctx, &ctx->tx->v, TX_MAX_INT256_LENGTH);
             break;
         default:
             // we don't allow unknown fields to be processed
@@ -206,14 +285,14 @@ static tx_stream_status_e txStreamParseFieldProxy(tx_stream_context_t *ctx) {
 // txStreamDetectField tries to detect field length block in the current data buffer.
 static tx_stream_status_e txStreamDetectField(tx_stream_context_t *ctx, bool *canDecode) {
     // we assume the decoding can not be done by default
-    canDecode = false;
+    *canDecode = false;
 
     // read to the end of current buffer
     while (ctx->commandLength != 0) {
         bool isValid;
 
         // validate if we are safely within the RLP buffer size
-        if (ctx->rlpBufferPos == SIZEOF(ctx->rlpBuffer)) {
+        if (ctx->rlpBufferPos == RLP_LENGTH_BUFFER_SIZE) {
             return TX_STREAM_FAULT;
         }
 
@@ -229,7 +308,7 @@ static tx_stream_status_e txStreamDetectField(tx_stream_context_t *ctx, bool *ca
             }
 
             // we can decode here
-            canDecode = true;
+            *canDecode = true;
             break;
         }
     }
@@ -296,7 +375,7 @@ static tx_stream_status_e txStreamParse(tx_stream_context_t *ctx) {
 
             // now we are processing a field
             ctx->currentFieldPos = 0;
-            ctx->processingField = true;
+            ctx->isProcessingField = true;
         }//(!ctx->isProcessingField)
 
         // parse the current field

@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "os.h"
-#include "cx.h"
 #include "transaction.h"
 
 // tx_rlp_field_e declares RLP processed field reference
@@ -34,6 +32,7 @@ typedef enum {
 
 // TX_FLAG_TYPE marks transactions with the type present
 #define TX_FLAG_TYPE 0x01
+#define RLP_LENGTH_BUFFER_SIZE 5
 
 // tx_stream_context_t declares context of a transaction stream
 typedef struct {
@@ -46,7 +45,7 @@ typedef struct {
     bool isFieldSingleByte;
 
     uint32_t dataLength;
-    uint8_t rlpBuffer[5];
+    uint8_t rlpBuffer[RLP_LENGTH_BUFFER_SIZE];
     uint32_t rlpBufferPos;
     uint8_t *workBuffer;
     uint32_t commandLength;
