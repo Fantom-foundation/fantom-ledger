@@ -1,3 +1,13 @@
+/*******************************************************************************
+* Fantom Ledger App
+* (c) 2020 Fantom Foundation
+*
+* Some parts of the code are derived from Ledger Ethereum App distributed under
+* Apache License, Version 2.0. You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+********************************************************************************/
 #include <stdint.h>
 
 #include "common.h"
@@ -50,7 +60,8 @@ static uint8_t txStreamReadByte(tx_stream_context_t *ctx) {
         ctx->currentFieldPos++;
     }
 
-    // if the field is single byte on, add the field hash to SHA3 context
+    // add the field hash to SHA3 context if appropriate
+    // we hash everything what isn't single byte field element
     if (!(ctx->isProcessingField && ctx->isFieldSingleByte)) {
         cx_hash((cx_hash_t *) ctx->sha3, 0, &data, 1, NULL, 0);
     }
@@ -70,8 +81,8 @@ static void txStreamCopyData(tx_stream_context_t *ctx, uint8_t *out, uint32_t le
         os_memmove(out, ctx->workBuffer, length);
     }
 
-    // if this is not a single byte while processing a field
-    // add the data hash to SHA3 context
+    // add the data hash to SHA3 context if appropriate
+    // we hash everything what isn't single byte field element
     if (!(ctx->isProcessingField && ctx->isFieldSingleByte)) {
         cx_hash((cx_hash_t *) ctx->sha3, 0, ctx->workBuffer, length, NULL, 0);
     }
@@ -236,13 +247,13 @@ static tx_stream_status_e txStreamParse(tx_stream_context_t *ctx) {
         }
 
         // old school transactions don't have the "v" value and anything beyond ("r" and "s")
-        if ((ctx->currentField == TX_RLP_V) && (context->commandLength == 0)) {
+        if ((ctx->currentField == TX_RLP_V) && (ctx->commandLength == 0)) {
             ctx->tx->v.length = 0;
             return TX_STREAM_FINISHED;
         }
 
         // did we reach the end of this wire buffer?
-        if (context->commandLength == 0) {
+        if (ctx->commandLength == 0) {
             return TX_STREAM_PROCESSING;
         }
 
