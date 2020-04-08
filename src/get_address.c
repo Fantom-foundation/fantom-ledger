@@ -6,8 +6,6 @@
 #include "policy.h"
 #include "ui_helpers.h"
 #include "address_utils.h"
-#include "os.h"
-#include "cx.h"
 
 // RESPONSE_READY_TAG is used to tag output buffer when address is ready.
 static uint16_t RESPONSE_READY_TAG = 32123;
