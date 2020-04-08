@@ -22,9 +22,9 @@
 static const uint8_t const HEXDIGITS[] = "0123456789abcdef";
 
 // deriveAddress implements address derivation for given BIP44 path.
-size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outputSize) {
+size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this number
-    ASSERT(outputSize < MAX_BUFFER_SIZE);
+    ASSERT(outSize < MAX_BUFFER_SIZE);
 
     // prep containers for private key
     private_key_t privateKey;
@@ -49,7 +49,7 @@ size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, s
             deriveRawPublicKey(&privateKey, &publicKey);
 
             // get raw address for the public key
-            addressSize = getRawAddress(&publicKey, sha3Context, out, outputSize);
+            addressSize = getRawAddress(&publicKey, sha3Context, out, outSize);
         }
         FINALLY
         {
@@ -63,9 +63,9 @@ size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, s
 }
 
 // getRawAddress implements wallet address calculation for given public key.
-size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, uint8_t *out, size_t outputSize) {
+size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this number
-    ASSERT(outputSize < MAX_BUFFER_SIZE);
+    ASSERT(outSize < MAX_BUFFER_SIZE);
 
     // make a buffer
     uint8_t hashAddress[32];
@@ -83,13 +83,13 @@ size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, ui
 }
 
 
-// formatAddressStr implements formatting of a raw address into a human readable textual form.
-void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_t outputSize) {
+// addressFormatStr implements formatting of a raw address into a human readable textual form.
+void addressFormatStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this number
-    ASSERT(outputSize < MAX_BUFFER_SIZE);
+    ASSERT(outSize < MAX_BUFFER_SIZE);
 
     // make sure the address will fit inside the buffer
-    VALIDATE(outputSize >= MIN_ADDRESS_STR_BUFFER_SIZE, ERR_ASSERT);
+    VALIDATE(outSize >= MIN_ADDRESS_STR_BUFFER_SIZE, ERR_ASSERT);
 
     // prep checksum buffer
     uint8_t hashChecksum[32];
@@ -134,5 +134,5 @@ void formatAddressStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
     // add address prefix and terminator
     out[0] = '0';
     out[1] = 'x';
-    out[43] = '\0';
+    out[42] = '\0';
 }
