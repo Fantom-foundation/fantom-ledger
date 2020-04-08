@@ -1,5 +1,4 @@
-#include "cx.h"
-#include "os.h"
+#include <string.h>
 
 #include "common.h"
 #include "get_tx_sign.h"
@@ -30,7 +29,7 @@ enum {
 
 // ASSERT_STAGE implements stage validation so the host can not step out off the protocol.
 // It's just a cosmetic definition to make the code readable and express our intention better.
-static inline void ASSERT_STAGE(sign_tx_stage_t expected) {
+static inline void ASSERT_STAGE(tx_stage_t expected) {
     VALIDATE(ctx->stage == expected, ERR_INVALID_STATE);
 }
 
@@ -83,7 +82,7 @@ static void handleSignTxInit(uint8_t p2, uint8_t *wireBuffer, size_t wireSize) {
     }
 
     // get the security policy for new transaction from a given address
-    security_policy_t policy = policyForSignTxInit(&ctx->fromPath);
+    security_policy_t policy = policyForSignTxInit(&ctx->path);
     ASSERT_NOT_DENIED(policy);
 
     // decide what UI step to take first based on policy
@@ -180,7 +179,7 @@ static void handleSignTxCollect(uint8_t p2, uint8_t *wireBuffer, size_t wireSize
     VALIDATE(wireSize >= 1, ERR_INVALID_DATA);
 
     // process the wire buffer with the tx stream
-    tx_stream_status_e status = txStreamProcess(ctx->stream, wireBuffer, wireSize, 0);
+    tx_stream_status_e status = txStreamProcess(&ctx->stream, wireBuffer, wireSize, 0);
     switch (status) {
         case TX_STREAM_PROCESSING:
             // the stream is waiting for additional data
@@ -209,7 +208,7 @@ static void handleSignTxCollect(uint8_t p2, uint8_t *wireBuffer, size_t wireSize
 // It's the last step where the host signals the transaction is ready for signature,
 // the device makes checks to confirm the transaction data are valid, calculates the signature,
 // asks user to validate the transaction details and responds to the host with the signature.
-static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer, size_t wireSize) {
+static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, size_t wireSize) {
     // validate we are on the right stage
     // the stream should have signaled to be done parsing the tx by now
     ASSERT_STAGE(SIGN_STAGE_FINALIZE);
@@ -274,7 +273,7 @@ static void runSignTransactionUIStep() {
                 addressFormatStr(ctx->tx.recipient.value, &ctx->sha3Context, addrStr, sizeof(addrStr));
             } else {
                 // smart contract targeted transaction
-                addrStr = "Contract";
+                strcpy(addrStr, "Contract");
             }
 
             // display the recipient address
@@ -295,7 +294,7 @@ static void runSignTransactionUIStep() {
 
             // create formatted address buffer and format for display
             char valueStr[64];
-            txGetFormattedAmount(ctx->tx.value, WEI_TO_FTM_DECIMALS, valueStr, sizeof(valueStr));
+            txGetFormattedAmount(&ctx->tx.value, WEI_TO_FTM_DECIMALS, valueStr, sizeof(valueStr));
 
             // display transferred amount for the transaction
             ui_displayPaginatedText(
@@ -315,7 +314,7 @@ static void runSignTransactionUIStep() {
 
             // create formatted address buffer and format for display
             char valueStr[64];
-            txGetFormattedFee(ctx->tx, WEI_TO_FTM_DECIMALS, valueStr, sizeof(valueStr));
+            txGetFormattedFee(&ctx->tx, WEI_TO_FTM_DECIMALS, valueStr, sizeof(valueStr));
 
             // display max fee for the transaction
             ui_displayPaginatedText(

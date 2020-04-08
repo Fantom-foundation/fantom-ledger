@@ -1,8 +1,6 @@
 #ifndef FANTOM_LEDGER_GET_TX_SIGN_H
 #define FANTOM_LEDGER_GET_TX_SIGN_H
 
-#include "os.h"
-#include "cx.h"
 #include "common.h"
 #include "handlers.h"
 #include "transaction.h"
@@ -11,7 +9,7 @@
 
 // WEI_TO_FTM_DECIMALS defines how many decimals we need to push
 // to convert between WEI units used for transaction amounts and human readable FTMs
-#define WEI_TO_FTM_DECIMALS 18;
+#define WEI_TO_FTM_DECIMALS 18
 
 // handleSignTransaction implements Sign Transaction APDU instruction handler.
 handler_fn_t handleSignTransaction;
