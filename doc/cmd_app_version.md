@@ -7,9 +7,9 @@ The function is safe to call at any time.
 
 #### Input data
 
-| *CLA* | *INS* | *P1* | *p2* | *Lc* | *Le* |
-|-------|-------|------|------|------|------|
-|  0xE0 |  0x01 | 0x00 | 0x00 | 0x00 | 0x04 |
+| *CLA* | *INS* | *P1* | *p2* | *Lc* |
+|-------|-------|------|------|------|
+|  0xE0 |  0x01 | 0x00 | 0x00 | 0x00 |
  
 #### Response Payload
 

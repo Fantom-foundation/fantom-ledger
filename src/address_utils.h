@@ -10,6 +10,12 @@
 // We need 2 letters for "0x" followed by 40 letters for the address hex + terminator.
 #define MIN_ADDRESS_STR_BUFFER_SIZE 43
 
+// ADDRESS_OUTPUT_SIZE is the number of bytes we use for formatted output address
+#define ADDRESS_OUTPUT_SIZE 20
+
+// ADDRESS_HASH_BUFFER_SIZE is the number of bytes we need to calculate raw address hash
+#define ADDRESS_HASH_BUFFER_SIZE 32
+
 // deriveAddress implements address derivation for given BIP44 path.
 size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize);
 

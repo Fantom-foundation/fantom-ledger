@@ -173,11 +173,13 @@ static void runGetAddressUIStep() {
             // make sure the address is ready
             ASSERT(ctx->responseReady == RESPONSE_READY_TAG);
 
-            // make sure the address is well inside the buffer
+            // make sure the address length is well inside the buffer size
             ASSERT(ctx->address.size <= SIZEOF(ctx->address.buffer));
 
             // send the data to remote host and switch idle
-            io_send_buf(SUCCESS, (uint8_t * ) & ctx->address, SIZEOF(ctx->address));
+            // we don't send the whole address buffer, some space is probably unused
+            // we send only the first byte (address length) + the bytes of the active address part
+            io_send_buf(SUCCESS, (uint8_t * ) & ctx->address, 1 + ctx->address.size);
             ui_idle();
 
             // set invalid step so we never cycle around
