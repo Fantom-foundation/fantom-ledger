@@ -273,7 +273,7 @@ void txGetFormattedFee(transaction_t *tx, uint8_t decimals, char *out, size_t ou
 
     // convert the value to decimal string
     char tmp[40];
-    size_t length = uint256ToString(&gasPrice, 10, (char *) tmp, sizeof(tmp));
+    size_t length = uint256ToString(&fee, 10, (char *) tmp, sizeof(tmp));
 
     // make sure we have any number here
     VALIDATE(length > 0, ERR_INVALID_DATA);
