@@ -20,7 +20,7 @@
 
 // txGetV implements transaction "v" value calculator.
 // The "v" value is used to identify chain on which the transaction should exist.
-uint32_t txGetV(const transaction_t *tx) {
+uint32_t txGetV(transaction_t *tx) {
     // default is no V
     uint32_t v = 0;
 
@@ -44,8 +44,8 @@ uint32_t txGetV(const transaction_t *tx) {
 // txGetSignature implements ECDSA signature calculation of a transaction hash.
 void txGetSignature(
         tx_signature_t *signature,
-        const bip44_path_t *path,
-        const uint8_t *hash,
+        bip44_path_t *path,
+        uint8_t *hash,
         size_t hashLength
 ) {
     private_key_t privateKey;
@@ -102,20 +102,26 @@ void txGetSignature(
                 xOffset++;
             }
 
-            // transfer the R data; validate that the size is ok for memory transfer
+            // validate that the size is ok for memory transfer
             VALIDATE(xLength <= TX_SIGNATURE_HASH_LENGTH, ERR_INVALID_DATA);
+            VALIDATE(xOffset + xLength < sigLength, ERR_INVALID_DATA);
+
+            // transfer the <r> data
             memmove(signature->r + TX_SIGNATURE_HASH_LENGTH - xLength, sig + xOffset, xLength);
 
-            // copy the S value; skip the r value and TagLEn
-            xOffset = xLength + 2;
+            // move to the <s> part; skip the copied <r> + tag LE <0x02> + <Ls>
+            xOffset = xOffset + xLength + 2;
             xLength = sig[xOffset - 1];
             if (xLength == 33) {
                 xLength = 32;
                 xOffset++;
             }
 
-            // transfer the S data; validate that the size is ok for memory transfer
+            // validate that the size is ok for memory transfer
             VALIDATE(xLength <= TX_SIGNATURE_HASH_LENGTH, ERR_INVALID_DATA);
+            VALIDATE(xOffset + xLength <= sigLength, ERR_INVALID_DATA);
+
+            // transfer the <s> data
             memmove(signature->s + TX_SIGNATURE_HASH_LENGTH - xLength, sig + xOffset, xLength);
         }
         FINALLY
@@ -231,7 +237,7 @@ static size_t adjustDecimals(
 }
 
 // txGetFormattedAmount creates human readable string representation of given int256 amount/value converted to FTM.
-void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, char *out, size_t outSize) {
+void txGetFormattedAmount(tx_int256_t *value, uint8_t decimals, char *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this size
     ASSERT(outSize < MAX_BUFFER_SIZE);
 
@@ -240,8 +246,8 @@ void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, char *out,
     uint256ConvertBE(&tmpValue, value->value, value->length);
 
     // convert the value to decimal string
-    char tmp[64];
-    size_t length = uint256ToString(&tmpValue, 10, (char *) &tmp, sizeof(tmp));
+    char tmp[40];
+    size_t length = uint256ToString(&tmpValue, 10, (char *) tmp, sizeof(tmp));
 
     // make sure we have any number here
     VALIDATE(length > 0, ERR_INVALID_DATA);
@@ -251,7 +257,7 @@ void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, char *out,
 }
 
 // txGetFormattedFee calculates the transaction fee and formats it to human readable FTM value.
-void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, char *out, size_t outSize) {
+void txGetFormattedFee(transaction_t *tx, uint8_t decimals, char *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this size
     ASSERT(outSize < MAX_BUFFER_SIZE);
 
@@ -266,8 +272,8 @@ void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, char *out, siz
     mul256(&gasPrice, &gasVolume, &fee);
 
     // convert the value to decimal string
-    char tmp[64];
-    size_t length = uint256ToString(&fee, 10, (char *) &tmp, sizeof(tmp));
+    char tmp[40];
+    size_t length = uint256ToString(&gasPrice, 10, (char *) tmp, sizeof(tmp));
 
     // make sure we have any number here
     VALIDATE(length > 0, ERR_INVALID_DATA);

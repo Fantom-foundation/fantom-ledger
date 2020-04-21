@@ -78,7 +78,7 @@ static void fantom_main(void) {
                 flags = 0;
 
                 // make sure we do expect APDU
-                ASSERT(io_state == IO_EXPECT_IO);
+                VALIDATE(io_state == IO_EXPECT_IO, ERR_INVALID_STATE);
                 io_state = IO_EXPECT_NONE;
 
                 // did we receive an APDU? if not, trigger reset

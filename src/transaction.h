@@ -45,20 +45,20 @@ typedef struct {
 
 // txGetV implements transaction "v" value calculator.
 // The "v" value is used to identify chain on which the transaction should exist.
-uint32_t txGetV(const transaction_t *tx);
+uint32_t txGetV(transaction_t *tx);
 
 // txGetSignature implements ECDSA signature calculation of a transaction hash.
 void txGetSignature(
         tx_signature_t *signature,
-        const bip44_path_t *path,
-        const uint8_t *hash,
+        bip44_path_t *path,
+        uint8_t *hash,
         size_t hashLength
 );
 
 // txGetFormattedAmount creates human readable string representation of given int256 amount/value converted to FTM.
-void txGetFormattedAmount(const tx_int256_t *value, uint8_t decimals, char *out, size_t outSize);
+void txGetFormattedAmount(tx_int256_t *value, uint8_t decimals, char *out, size_t outSize);
 
 // txGetFormattedFee calculates the transaction fee and formats it to human readable FTM value.
-void txGetFormattedFee(const transaction_t *tx, uint8_t decimals, char *out, size_t outSize);
+void txGetFormattedFee(transaction_t *tx, uint8_t decimals, char *out, size_t outSize);
 
 #endif //FANTOM_LEDGER_TRANSACTION_H

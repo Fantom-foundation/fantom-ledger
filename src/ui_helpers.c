@@ -175,6 +175,9 @@ void ui_displayBusy() {
     // clear all memory; use safe macro from utils.h
     MEMCLEAR(&displayState, displayState);
 
+    // validate the i/o state we are in and set it to waiting for user interaction
+    ASSERT(io_state == IO_EXPECT_NONE || io_state == IO_EXPECT_IO);
+
     // change the UX flow to the configured busy screen
     ui_doDisplayBusy();
 }

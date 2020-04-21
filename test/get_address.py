@@ -52,7 +52,8 @@ dongle = getDongle(True)
 result = dongle.exchange(bytes(apdu))
 
 # parse response and show the key data
-offset = 1 + result[0]
-address = result[offset + 1: offset + 1 + result[offset]]
+print("Address length (bytes):", result[0])
 
-print("Raw Address", binascii.hexlify(result[1: 1 + result[0]]).decode())
+# the response format is <1 byte length><bytes address>
+address = result[1: 1 + result[0]]
+print("Raw Address", binascii.hexlify(address).decode())

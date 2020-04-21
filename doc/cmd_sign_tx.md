@@ -18,13 +18,13 @@ User validates:
 ### Command Coding
 
 We use 3 types of APDU blocks to communicate during the signing process.
-1) Initialize Transaction Signing block for source address construction.
-2) Transaction Details block for RLP encoded transaction data streaming.
-3) Final Confirmation block for processing the transaction data and building the signature.
+1) **Initialize Transaction** Signing block for source address construction.
+2) **Transaction Details** block for RLP encoded transaction data streaming.
+3) **Final Confirmation** block for processing the transaction data and building the signature.
 
 #### Input data
 
-**Initialize Transaction Signing block**
+**1) Initialize Transaction Signing block**
  
 | *CLA* | *INS* | *P1* | *P2* |   *Lc*   |
 |-------|-------|------|------|----------|
@@ -37,7 +37,7 @@ address.
 |-------------|-----------------------------|------------------|-----|-----------------|
 | Size (Byte) |    1                        |        4         |     |       4         |
 
-**Transaction Details block**
+**2) Transaction Details block**
 
 | *CLA* | *INS* | *P1* | *P2* |   *Lc*   |
 |-------|-------|------|------|----------|
@@ -49,13 +49,38 @@ Data payload of the subsequent transaction block container is RLP encoded transa
 |-------------|-------------|
 | Size (Byte) |   variable  |
 
-**Final Confirmation block**
+###### Response Payload:
+
+|Description: |  *stage*  |
+|-------------|-----------|
+|Size:        |     1     |
+
+The application responds with the current transaction processing stage. Following stages
+are recognized and used by the application:
+
+  - 0 (SIGN_STAGE_NONE): transaction is not being processed.
+  - 1 (SIGN_STAGE_INIT): transaction processing is initialized.
+  - 2 (SIGN_STAGE_COLLECT): transaction is being processed and tx data is expected to be received.  
+  - 4 (SIGN_STAGE_FINALIZE): transaction processing is done and all the tx data has been collected.
+  - 8 (SIGN_STAGE_DONE): transaction processing and signature building is finished.
+
+Expect to receive either SIGN_STAGE_COLLECT, or SIGN_STAGE_FINALIZE on normal operations. The application 
+is either waiting to receive more transaction data on the next APDU chunk, or it already has all 
+the data it needs and is ready to go through the final transaction content verification, user confirmation
+and signing process.
+
+If you receive anything else than these two stages, the application is in an unpredicted state 
+and you should stop sending new data and advice user to disconnect and re-connect the device.
+The application is actively trying to prevent unpredicted state, please see the application 
+responsibility section below.  
+
+**3) Final Confirmation block**
 
 | *CLA* | *INS* | *P1* | *P2* | *Lc* |
 |-------|-------|------|------|------|
 |  0xE0 |  0x20 | 0x80 | 0x00 | 0x00 |
 
-#### Response Payload
+###### Response Payload:
 
 |Description: |  *v*  |  *r*  |  *s*  |
 |-------------|-------|-------|-------|

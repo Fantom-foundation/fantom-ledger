@@ -73,6 +73,9 @@ static void handleSignTxInit(uint8_t p2, uint8_t *wireBuffer, size_t wireSize) {
     // clear the response ready tag
     ctx->responseReady = 0;
 
+    // initialize the incoming tx data stream
+    txStreamInit(&ctx->stream, &ctx->sha3Context, &ctx->tx);
+
     // parse BIP44 path from the incoming request
     size_t parsedSize = bip44_parseFromWire(&ctx->path, wireBuffer, wireSize);
 
@@ -198,7 +201,9 @@ static void handleSignTxCollect(uint8_t p2, uint8_t *wireBuffer, size_t wireSize
     }
 
     // respond to the host to continue sending data
-    io_send_buf(SUCCESS, NULL, 0);
+    // we send the current stage to verify the progress
+    uint8_t res = ctx->stage;
+    io_send_buf(SUCCESS, (uint8_t * ) & res, 1);
 
     // we are still busy loading the data
     ui_displayBusy();
@@ -216,14 +221,17 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     // validate the p2 value
     VALIDATE(p2 == 0, ERR_INVALID_PARAMETERS);
 
-    // sanity check; we don't need any data here so just check if the buffer has sane dimensions
-    ASSERT(wireSize < MAX_BUFFER_SIZE);
+    // we don't expect to receive any data here
+    VALIDATE(wireSize == 0, ERR_INVALID_DATA);
+
+    // we don't expect any more data to be coming from the host
+    io_state = IO_EXPECT_UI;
 
     // get the security policy for new transaction from a given address
     security_policy_t policy = policyForSignTxFinalize();
     ASSERT_NOT_DENIED(policy);
 
-    // validate the value V of the transaction (should be zero for now, no extra chains)
+    // validate the value CHAIN_ID (transferred as v) of the transaction
     VALIDATE(txGetV(&ctx->tx) == 0, ERR_INVALID_DATA);
 
     // extract the transaction hash value from SHA3 context
@@ -231,7 +239,7 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     cx_hash((cx_hash_t * ) & ctx->sha3Context, CX_LAST, hash, 0, hash, TX_HASH_LENGTH);
 
     // get the transaction signature
-    txGetSignature(&ctx->signature, &ctx->path, hash, sizeof(hash));
+    txGetSignature(&ctx->signature, &ctx->path, (uint8_t *) hash, sizeof(hash));
 
     // mark the signature as ready
     ctx->responseReady = RESPONSE_READY_TAG;
@@ -265,7 +273,7 @@ static void runSignTransactionUIStep() {
     switch (ctx->uiStep) {
         case UI_STEP_TX_RECIPIENT: {
             // make sure the advertised address length is well inside the address buffer size
-            ASSERT(ctx->tx.recipient.length < SIZEOF(ctx->tx.recipient.value));
+            ASSERT(ctx->tx.recipient.length <= SIZEOF(ctx->tx.recipient.value));
 
             // create formatted address buffer and format for display
             char addrStr[64];
@@ -290,10 +298,10 @@ static void runSignTransactionUIStep() {
 
         case UI_STEP_TX_AMOUNT: {
             // make sure the advertised amount length is well inside the buffer size
-            ASSERT(ctx->tx.value.length < SIZEOF(ctx->tx.value.value));
+            ASSERT(ctx->tx.value.length <= SIZEOF(ctx->tx.value.value));
 
             // create formatted address buffer and format for display
-            char valueStr[64];
+            char valueStr[40];
             txGetFormattedAmount(&ctx->tx.value, WEI_TO_FTM_DECIMALS, valueStr, sizeof(valueStr));
 
             // display transferred amount for the transaction
@@ -304,16 +312,17 @@ static void runSignTransactionUIStep() {
             );
 
             // set next step
-            ctx->uiStep = UI_STEP_INIT_CONFIRM;
+            ctx->uiStep = UI_STEP_TX_FEE;
             break;
         }
 
         case UI_STEP_TX_FEE: {
-            // make sure the advertised amount length is well inside the buffer size
-            ASSERT(ctx->tx.value.length < SIZEOF(ctx->tx.value.value));
+            // make sure the advertised gas amount and price length is well inside the buffer size
+            ASSERT(ctx->tx.gasPrice.length <= SIZEOF(ctx->tx.gasPrice.value));
+            ASSERT(ctx->tx.startGas.length <= SIZEOF(ctx->tx.startGas.value));
 
             // create formatted address buffer and format for display
-            char valueStr[64];
+            char valueStr[40];
             txGetFormattedFee(&ctx->tx, WEI_TO_FTM_DECIMALS, valueStr, sizeof(valueStr));
 
             // display max fee for the transaction
@@ -324,7 +333,7 @@ static void runSignTransactionUIStep() {
             );
 
             // set next step
-            ctx->uiStep = UI_STEP_INIT_CONFIRM;
+            ctx->uiStep = UI_STEP_TX_CONFIRM;
             break;
         }
 
@@ -338,7 +347,7 @@ static void runSignTransactionUIStep() {
             );
 
             // set next step
-            ctx->uiStep = UI_STEP_INIT_RESPOND;
+            ctx->uiStep = UI_STEP_TX_RESPOND;
             break;
         }
 

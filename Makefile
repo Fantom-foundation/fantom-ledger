@@ -23,9 +23,9 @@ include $(BOLOS_SDK)/Makefile.defines
 DEFINES_LIB = USE_LIB_ETHEREUM
 APP_LOAD_PARAMS= --curve secp256k1 --path "44'/60'" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
 
-APPVERSION_M=0
-APPVERSION_N=1
-APPVERSION_P=7
+APPVERSION_M=1
+APPVERSION_N=0
+APPVERSION_P=3
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 APPNAME = "Fantom Nano"
 
@@ -58,7 +58,7 @@ DEFINES   += U2F_PROXY_MAGIC=\"FTM\"
 DEFINES   += USB_SEGMENT_SIZE=64
 DEFINES   += BLE_SEGMENT_SIZE=32 #max MTU, min 20
 
-WEBUSB_URL     = fantom.foundation
+WEBUSB_URL     = ""
 DEFINES       += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | wc -c) WEBUSB_URL=$(shell echo -n $(WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
 
 DEFINES   += UNUSED\(x\)=\(void\)x

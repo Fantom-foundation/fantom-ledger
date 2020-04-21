@@ -7,9 +7,9 @@ display, nor returns, the address associated with the public key.
 
 #### Input data
 
-| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |   *Le*   |
-|-------|-------|------|------|----------|----------|
-|  0xE0 |  0x10 | 0x00 | 0x00 | variable | variable |
+| *CLA* | *INS* | *P1* | *P2* |   *Lc*   |
+|-------|-------|------|------|----------|
+|  0xE0 |  0x10 | 0x00 | 0x00 | variable |
 
 Data payload contains BIP32 derivations setup.
 
@@ -19,9 +19,9 @@ Data payload contains BIP32 derivations setup.
 
 #### Response Payload
 
-|Description: | Key Length     | Public Key  |
-|-------------|----------------|-------------|
-|Size:        |   1            | variable    |
+|Description: | Key Length     | Public Key  | Chain Code |
+|-------------|----------------|-------------|------------|
+|Size:        |   1            |  variable   |  variable  |
 
 #### Application responsibility
 
