@@ -32,7 +32,7 @@ typedef enum {
 security_policy_t policyForGetPublicKey(const bip44_path_t* path);
 
 // policyForGetPublicKey implements policy test for address derivation.
-security_policy_t policyForGetAddress(const bip44_path_t* path);
+security_policy_t policyForGetAddress(const bip44_path_t* path, const bool isShowAddress);
 
 // policyForSignTxInit implements policy test for new transaction being signed.
 security_policy_t policyForSignTxInit(const bip44_path_t* path);

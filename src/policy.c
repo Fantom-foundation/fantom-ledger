@@ -24,7 +24,7 @@ security_policy_t policyForGetPublicKey(const bip44_path_t *path) {
 }
 
 // policyForGetPublicKey implements policy test for address derivation.
-security_policy_t policyForGetAddress(const bip44_path_t *path) {
+security_policy_t policyForGetAddress(const bip44_path_t *path, const bool isShowAddress) {
     // deny if the path does not contain valid Fantom prefix
     DENY_IF(!bip44_hasValidFantomPrefix(path));
 
@@ -44,7 +44,11 @@ security_policy_t policyForGetAddress(const bip44_path_t *path) {
     WARN_IF(bip44_containsMoreThanAddress(path));
 
     // display prompt by default
-    PROMPT_IF(true);
+    if (isShowAddress) {
+        PROMPT_IF(true);
+    } else {
+        ALLOW_IF(true);
+    }
 }
 
 // policyForSignTxInit implements policy test for new transaction being signed.

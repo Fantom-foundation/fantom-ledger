@@ -65,7 +65,7 @@ void handleGetAddress(
     }
 
     // check security policy for the instruction we are about to run
-    security_policy_t policy = policyForGetAddress(&ctx->path);
+    security_policy_t policy = policyForGetAddress(&ctx->path, ctx->isShowAddress);
     ASSERT_NOT_DENIED(policy);
 
     // derive the address and mark as ready

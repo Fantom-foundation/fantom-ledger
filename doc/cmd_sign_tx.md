@@ -37,6 +37,10 @@ address.
 |-------------|-----------------------------|------------------|-----|-----------------|
 | Size (Byte) |    1                        |        4         |     |       4         |
 
+###### Response Payload
+The initialization block does not respond with any payload. Only confirmation, or rejection status message
+is given back.  
+
 **2) Transaction Details block**
 
 | *CLA* | *INS* | *P1* | *P2* |   *Lc*   |

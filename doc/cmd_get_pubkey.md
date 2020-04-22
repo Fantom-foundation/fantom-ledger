@@ -29,13 +29,18 @@ Validate content of fields P1, P2, and Lc. All parameters are expected
 to be set to defined values. Any other value will be identified
 as an error and responded with error message.
 
-Validate BIP32 derivation path to be valid withing Fantom address space.
-Minimal path length is 0x02 and maximal path length is 0x0a.
+Validate BIP32 derivation path to be accepted withing Fantom address space.
 
 We use BIP44 specification for address derivation, the address namespace
-is shared with Ether.
+is shared with Ether. The minimal expected path contains account field, 
+user is warned about unusual request if the path does not follow BIP44
+standard.
 
 #####Derivation indexes, their meanings and expected values:
+The BIP44 standard defines following five levels of BIP32 path:
+
+`m / purpose' / coin_type' / account' / change / address_index` 
+
 1) **Purpose**: 
     fixed value *44'*.
     

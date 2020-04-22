@@ -11,9 +11,9 @@ Each command consists of series of APDU messages where each single message uses 
 ### Request
 
 
-| *Field*       | *CLA* | *INS* | *P1* | *P2* | *Lc* | *Data*   | *Le* |
-|---------------|-------|-------|------|------|------|----------|-------
-| *Size* (Byte) |   1   |   1   |   1  |   1  |   1  | variable |   1  |
+| *Field*       | *CLA* | *INS* | *P1* | *P2* | *Lc* | *Data*   |
+|---------------|-------|-------|------|------|------|----------|
+| *Size* (Byte) |   1   |   1   |   1  |   1  |   1  | variable |
 
 
 Where:
@@ -22,7 +22,6 @@ Where:
     - *P2* and *P2* are the instruction parameters.
     - *Lc* is length of the data body as unsigned `uint8` type. Data lengths greater than 255 bytes are not supported.
     - *Data* is the message payload. Arbitrary data required to perform the instruction.
-    - *Le* is the max length of the response.
 
 Any unused fields *must* be set to zero by the sender. The application is responsible for verification 
 and validation of the incoming message and if an unused field contains any other value than zero, the
@@ -63,7 +62,6 @@ This group contains instructions related to public key handling and address deri
   - 0x10 ... [Get Public Key](cmd_get_pubkey.md)
   - 0x11 ... [Get Address](cmd_get_address.md)
 
-
 #### INS 0x2i Group
 
 This group contains instructions related to transaction verification and signing.
@@ -76,6 +74,6 @@ This group contains instructions related to transaction verification and signing
 We would like to ensure forward compatibility of the protocol with newer version of the application.
 For that the sender is required to set all unused fields of a message to **ZERO**. When upgrading,
 any previously unused field which will get a meaning will be required to use value **ONE** as the
-correct value. IN taht case a previous version of the application will respond with error message
+correct value. IN that case a previous version of the application will respond with error message
 since there will be an unexpected value in the meesage, instead of falling back to some undefined
 and unexpected behavior.
