@@ -46,27 +46,30 @@ void txGetSignature(
         tx_signature_t *signature,
         bip44_path_t *path,
         uint8_t *hash,
-        size_t hashLength
+        size_t hashLength,
+        uint32_t v
 ) {
     private_key_t privateKey;
     chain_code_t chainCode;
     uint8_t sigLength;
     uint8_t sig[100];
 
-    // validate hash size
-    VALIDATE(hashLength == TX_HASH_LENGTH, ERR_INVALID_DATA);
-
     // make sure the signature is of expected length (v + r + s)
     STATIC_ASSERT(SIZEOF(*signature) == 1 + TX_SIGNATURE_HASH_LENGTH + TX_SIGNATURE_HASH_LENGTH, "bad signature size");
+
+    // validate hash size
+    ASSERT(hashLength == TX_HASH_LENGTH);
 
     // do the extraction
     BEGIN_TRY
     {
         TRY
         {
+            // beat the i/o
+            io_seproxyhal_io_heartbeat();
+
             // derive private key
             derivePrivateKey(path, &chainCode, &privateKey);
-            io_seproxyhal_io_heartbeat();
 
             // calculate signature of the hash
             unsigned int info = 0;
@@ -76,6 +79,9 @@ void txGetSignature(
                                       hash, hashLength,
                                       sig, sizeof(sig),
                                       &info);
+
+            // beat the i/o
+            io_seproxyhal_io_heartbeat();
 
             // any signature received?
             VALIDATE(sigLength > 0, ERR_INVALID_DATA);
