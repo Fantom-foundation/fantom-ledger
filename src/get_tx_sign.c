@@ -80,9 +80,7 @@ static void handleSignTxInit(uint8_t p2, uint8_t *wireBuffer, size_t wireSize) {
     size_t parsedSize = bip44_parseFromWire(&ctx->path, wireBuffer, wireSize);
 
     // make sure size of the data we parsed corresponds with the data we received
-    if (parsedSize != wireSize) {
-        THROW(ERR_INVALID_DATA);
-    }
+    VALIDATE(parsedSize == wireSize, ERR_INVALID_DATA);
 
     // get the security policy for new transaction from a given address
     security_policy_t policy = policyForSignTxInit(&ctx->path);
@@ -231,15 +229,16 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     security_policy_t policy = policyForSignTxFinalize();
     ASSERT_NOT_DENIED(policy);
 
-    // validate the value CHAIN_ID (transferred as v) of the transaction
-    VALIDATE(txGetV(&ctx->tx) == 0, ERR_INVALID_DATA);
+    // validate the value CHAIN_ID (transferred as v on incoming stream) of the transaction
+    // We sign only Fantom chain messages to mitigate possible replay attacks.
+    VALIDATE(txGetV(&ctx->tx) == EXPECTED_CHAIN_ID, ERR_INVALID_DATA);
 
     // extract the transaction hash value from SHA3 context
     uint8_t hash[TX_HASH_LENGTH];
     cx_hash((cx_hash_t * ) & ctx->sha3Context, CX_LAST, hash, 0, hash, TX_HASH_LENGTH);
 
     // get the transaction signature
-    txGetSignature(&ctx->signature, &ctx->path, (uint8_t *) hash, sizeof(hash));
+    txGetSignature(&ctx->signature, &ctx->path, hash, TX_HASH_LENGTH);
 
     // mark the signature as ready
     ctx->responseReady = RESPONSE_READY_TAG;
@@ -278,7 +277,10 @@ static void runSignTransactionUIStep() {
             // create formatted address buffer and format for display
             char addrStr[64];
             if (ctx->tx.recipient.length > 0) {
-                addressFormatStr(ctx->tx.recipient.value, &ctx->sha3Context, addrStr, sizeof(addrStr));
+                addressFormatStr(
+                        ctx->tx.recipient.value, ctx->tx.recipient.length,
+                        &ctx->sha3Context,
+                        addrStr, sizeof(addrStr));
             } else {
                 // smart contract targeted transaction
                 strcpy(addrStr, "Contract");

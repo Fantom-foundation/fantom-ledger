@@ -52,8 +52,7 @@ void txGetSignature(
         tx_signature_t *signature,
         bip44_path_t *path,
         uint8_t *hash,
-        size_t hashLength,
-        uint32_t v
+        size_t hashLength
 );
 
 // txGetFormattedAmount creates human readable string representation of given int256 amount/value converted to FTM.

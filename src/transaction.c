@@ -46,8 +46,7 @@ void txGetSignature(
         tx_signature_t *signature,
         bip44_path_t *path,
         uint8_t *hash,
-        size_t hashLength,
-        uint32_t v
+        size_t hashLength
 ) {
     private_key_t privateKey;
     chain_code_t chainCode;

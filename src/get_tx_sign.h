@@ -11,6 +11,12 @@
 // to convert between WEI units used for transaction amounts and human readable FTMs
 #define WEI_TO_FTM_DECIMALS 18
 
+// EXPECTED_CHAIN_ID represents expected chain id for the Fantom network
+// We don't sign transaction outside of the Fantom space, the whole chain
+// is EIP155 compliant and tries to prevent any replay attack vectors.
+// This is one of the mitigation in place.
+#define EXPECTED_CHAIN_ID 0xfa
+
 // handleSignTransaction implements Sign Transaction APDU instruction handler.
 handler_fn_t handleSignTransaction;
 
