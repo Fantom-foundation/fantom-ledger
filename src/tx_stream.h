@@ -36,6 +36,10 @@ typedef enum {
 
 // tx_stream_context_t declares context of a transaction stream
 typedef struct {
+    // SHA3 hash of the transaction needs to keep the state
+    // across incoming chunks of data from the host
+    cx_sha3_t *sha3Context;
+
     // currently processed field details
     tx_rlp_field_e currentField;
     uint32_t currentFieldLength;
@@ -52,7 +56,7 @@ typedef struct {
     // RLP peek buffer is used to collect the next RLP value
     // signature across data chunks
     uint8_t rlpBuffer[RLP_LENGTH_BUFFER_SIZE];
-    uint32_t rlpBufferPos;
+    uint32_t rlpBufferOffset;
 
     // work buffer for the currently processed chunk of data
     // received from the host via APDU
@@ -66,10 +70,6 @@ typedef struct {
     // we will be showing some parts of the tx to end user
     // so we need to keep it
     transaction_t *tx;
-
-    // SHA3 hash of the transaction needs to keep the state
-    // across incoming chunks of data from the host
-    cx_sha3_t *sha3;
 } tx_stream_context_t;
 
 
@@ -77,7 +77,7 @@ typedef struct {
 // We assign references, initialize SHA3 context and set the currently expected field.
 void txStreamInit(
         tx_stream_context_t *ctx,
-        cx_sha3_t *sha3,
+        cx_sha3_t *sha3Context,
         transaction_t *tx);
 
 // txStreamProcess implements processing of a buffer of data into the transaction stream.
