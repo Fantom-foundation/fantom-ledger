@@ -141,7 +141,7 @@ static void runGetAddressUIStep() {
 
             // create formatted address buffer and format for display
             char addrStr[64];
-            addressFormatStr(ctx->address.buffer, &ctx->sha3Context, addrStr, SIZEOF(addrStr));
+            addressFormatStr(ctx->address.buffer, ctx->address.size, &ctx->sha3Context, addrStr, SIZEOF(addrStr));
 
             // show user the address being exported
             ui_displayPaginatedText(

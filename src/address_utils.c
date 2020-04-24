@@ -23,7 +23,7 @@ static const uint8_t const HEXDIGITS[] = "0123456789abcdef";
 size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this number
     ASSERT(outSize < MAX_BUFFER_SIZE);
-    ASSERT(outSize >= ADDRESS_OUTPUT_SIZE);
+    ASSERT(outSize >= RAW_ADDRESS_SIZE);
 
     // prep containers for private key
     private_key_t privateKey;
@@ -64,8 +64,8 @@ size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, s
 // getRawAddress implements wallet address calculation for given public key.
 size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize) {
     // make sanity check, the buffer has to be at least this big
-    ASSERT(outSize >= ADDRESS_OUTPUT_SIZE);
-    ASSERT(ADDRESS_HASH_BUFFER_SIZE >= ADDRESS_OUTPUT_SIZE);
+    ASSERT(outSize >= RAW_ADDRESS_SIZE);
+    ASSERT(ADDRESS_HASH_BUFFER_SIZE >= RAW_ADDRESS_SIZE);
 
     // make a buffer
     uint8_t hashAddress[ADDRESS_HASH_BUFFER_SIZE];
@@ -77,15 +77,19 @@ size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, ui
     cx_hash((cx_hash_t *) sha3Context, CX_LAST, publicKey->W + 1, 64, hashAddress, 32);
 
     // move the last 20 bytes of the hash to output buffer
-    os_memmove(out, hashAddress + (ADDRESS_HASH_BUFFER_SIZE - ADDRESS_OUTPUT_SIZE), ADDRESS_OUTPUT_SIZE);
-    return ADDRESS_OUTPUT_SIZE;
+    os_memmove(out, hashAddress + (ADDRESS_HASH_BUFFER_SIZE - RAW_ADDRESS_SIZE), RAW_ADDRESS_SIZE);
+    return RAW_ADDRESS_SIZE;
 }
 
 
 // addressFormatStr implements formatting of a raw address into a human readable textual form.
-void addressFormatStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_t outSize) {
+void addressFormatStr(uint8_t *address, size_t addrLen, cx_sha3_t *sha3Context, char *out, size_t outSize) {
     // make sanity check, the buffer may never exceed this number
     ASSERT(outSize < MAX_BUFFER_SIZE);
+
+    // make sanity check, is the input address buffer of the right size
+    ASSERT(addrLen > 0);
+    ASSERT(addrLen <= RAW_ADDRESS_SIZE);
 
     // make sure the address will fit inside the buffer
     ASSERT(outSize >= MIN_ADDRESS_STR_BUFFER_SIZE);
@@ -97,7 +101,7 @@ void addressFormatStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
 
     // prep base textual address representation (convert BYTE to HEX)
     // so we can calculate SHA3 hash of the address and add folding checksum
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < addrLen; i++) {
         uint8_t digit = address[i];
         tmp[2 * i] = HEXDIGITS[(digit >> 4) & 0x0f];
         tmp[2 * i + 1] = HEXDIGITS[digit & 0x0f];
@@ -108,7 +112,7 @@ void addressFormatStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
     cx_hash((cx_hash_t *) sha3Context, CX_LAST, tmp, 40, hashChecksum, 32);
 
     // parse address digits
-    for (i = 0; i < 40; i++) {
+    for (i = 0; i < (2 * RAW_ADDRESS_SIZE); i++) {
         uint8_t digit = address[i / 2];
         if ((i % 2) == 0) {
             digit = (digit >> 4) & 0x0f;
@@ -134,4 +138,33 @@ void addressFormatStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_
     out[0] = '0';
     out[1] = 'x';
     out[42] = '\0';
+}
+
+// byteFormatStr implements formatting of a raw byte buffer into a human readable hex form.
+void byteFormatStr(uint8_t *buffer, size_t bufLen, char *out, size_t outSize) {
+    // make sanity check, the buffer may never exceed this number
+    ASSERT(outSize < MAX_BUFFER_SIZE);
+
+    // make sanity check, is the input buffer of reasonable size
+    ASSERT(bufLen > 0);
+    ASSERT(bufLen <= 64);
+
+    // make sure the output will fit inside the buffer
+    ASSERT(outSize >= 3 + (2 * bufLen));
+
+    // clear the mem
+    os_memset(out, 0, outSize);
+
+    uint8_t i;
+
+    // prep base textual representation (convert BYTE to HEX)
+    for (i = 0; i < bufLen; i++) {
+        uint8_t digit = buffer[i];
+        out[(2 * i) + 2] = HEXDIGITS[(digit >> 4) & 0x0f];
+        out[(2 * i) + 3] = HEXDIGITS[digit & 0x0f];
+    }
+
+    // add address prefix and terminator
+    out[0] = '0';
+    out[1] = 'x';
 }

@@ -10,8 +10,8 @@
 // We need 2 letters for "0x" followed by 40 letters for the address hex + terminator.
 #define MIN_ADDRESS_STR_BUFFER_SIZE 43
 
-// ADDRESS_OUTPUT_SIZE is the number of bytes we use for formatted output address
-#define ADDRESS_OUTPUT_SIZE 20
+// RAW_ADDRESS_SIZE is the number of bytes we use for formatted output address
+#define RAW_ADDRESS_SIZE 20
 
 // ADDRESS_HASH_BUFFER_SIZE is the number of bytes we need to calculate raw address hash
 #define ADDRESS_HASH_BUFFER_SIZE 32
@@ -23,6 +23,9 @@ size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, s
 size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize);
 
 // addressFormatStr implements formatting of a raw address into a human readable textual form.
-void addressFormatStr(uint8_t *address, cx_sha3_t *sha3Context, char *out, size_t outSize);
+void addressFormatStr(uint8_t *address, size_t addrLen, cx_sha3_t *sha3Context, char *out, size_t outSize);
+
+// byteFormatStr implements formatting of a raw byte buffer into a human readable hex form.
+void byteFormatStr(uint8_t *buffer, size_t bufLen, char *out, size_t outSize);
 
 #endif //FANTOM_LEDGER_ADDRESS_UTILS_H

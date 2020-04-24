@@ -55,10 +55,10 @@ void derivePrivateKey(
                     path->length,
                     privateKeyRawBuffer,
                     chainCode->code);
-            io_seproxyhal_io_heartbeat();
 
             // copy the private key
             cx_ecfp_init_private_key(CX_CURVE_256K1, privateKeyRawBuffer, RAW_PRIVATE_KEY_SIZE, privateKey);
+            io_seproxyhal_io_heartbeat();
         }
         FINALLY
         {
