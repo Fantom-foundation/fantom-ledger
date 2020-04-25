@@ -285,7 +285,7 @@ static void runSignTransactionUIStep() {
                     &ctx->sha3Context,
                     addrStr, sizeof(addrStr));
 
-            // display the recipient address
+            // display the sender (derived from path) address
             ui_displayPaginatedText(
                     "Your address",
                     addrStr,

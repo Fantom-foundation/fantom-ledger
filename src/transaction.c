@@ -150,9 +150,18 @@ void txGetSignature(
             // transfer the <s> data
             memmove(signature->s + TX_SIGNATURE_HASH_LENGTH - xLength, sig + xOffset, xLength);
         }
+        CATCH_OTHER(e)
+        {
+            // clean up the private key in memory so we don't leek it in any way and shape
+            // do we need to do that if we re-throw? let's better be safe than sorry with PKs.
+            os_memset(&privateKey, 0, SIZEOF(privateKey));
+
+            // re-throw the exception so it's collected in the main loop
+            THROW(e);
+        }
         FINALLY
         {
-            // clean up the private key in memory so we don't leek it in any way after this call
+            // clean up the private key in memory so we don't leek it in any way
             os_memset(&privateKey, 0, SIZEOF(privateKey));
         }
     }
