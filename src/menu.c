@@ -16,7 +16,7 @@ UX_STEP_NOCB(
         pnn,
         ITEMS (
             &C_fantom_logo,
-            "Fantom Nano",
+            "Fantom FTM",
             "Ready ..."
         )
 );

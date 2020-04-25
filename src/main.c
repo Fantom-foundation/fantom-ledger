@@ -212,8 +212,8 @@ __attribute__((section(".boot"))) int main(void) {
 
     for (;;) {
         // ensure exception will work as planned
-        UX_INIT();
         os_boot();
+        UX_INIT();
 
         // capture exceptions from main loop
         BEGIN_TRY
@@ -235,7 +235,7 @@ __attribute__((section(".boot"))) int main(void) {
 
 #if defined(HAVE_BLE)
                 BLE_power(0, NULL);
-                BLE_power(1, "Nano X ADA");
+                BLE_power(1, "Nano X FTM");
 #endif
 
                 // set initial state and start the main loop
