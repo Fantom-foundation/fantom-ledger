@@ -15,6 +15,7 @@
 #include "errors.h"
 #include "transaction.h"
 #include "derive_key.h"
+#include "address_utils.h"
 #include "bip44.h"
 #include "uint256.h"
 
@@ -43,10 +44,12 @@ uint32_t txGetV(transaction_t *tx) {
 
 // txGetSignature implements ECDSA signature calculation of a transaction hash.
 void txGetSignature(
-        tx_signature_t *signature,
         bip44_path_t *path,
         uint8_t *hash,
-        size_t hashLength
+        size_t hashLength,
+        cx_sha3_t *sha3Context,
+        tx_address_t *sender,
+        tx_signature_t *signature
 ) {
     private_key_t privateKey;
     chain_code_t chainCode;
@@ -55,6 +58,9 @@ void txGetSignature(
 
     // make sure the signature is of expected length (v + r + s)
     STATIC_ASSERT(SIZEOF(*signature) == 1 + TX_SIGNATURE_HASH_LENGTH + TX_SIGNATURE_HASH_LENGTH, "bad signature size");
+
+    // make sure the space for the derived sender address is enough
+    STATIC_ASSERT(SIZEOF(*sender) == 1 + TX_MAX_ADDRESS_LENGTH, "bad sender address size");
 
     // validate hash size
     ASSERT(hashLength == TX_HASH_LENGTH);
@@ -70,6 +76,21 @@ void txGetSignature(
             // derive private key
             derivePrivateKey(path, &chainCode, &privateKey);
 
+            // derive the public key from the private one
+            cx_ecfp_public_key_t publicKey;
+            deriveRawPublicKey(&privateKey, &publicKey);
+
+            // get raw address of the sender and put it into the address reference
+            size_t adrSize = getRawAddress(&publicKey, sha3Context, sender->value, TX_MAX_ADDRESS_LENGTH);
+
+            // make sanity check here so we are absolutely sure
+            // the address is within the provided buffer
+            ASSERT(adrSize <= TX_MAX_ADDRESS_LENGTH);
+            sender->length = adrSize;
+
+            // beat the i/o
+            io_seproxyhal_io_heartbeat();
+
             // calculate signature of the hash
             unsigned int info = 0;
             sigLength = cx_ecdsa_sign(&privateKey,
@@ -82,8 +103,8 @@ void txGetSignature(
             // beat the i/o
             io_seproxyhal_io_heartbeat();
 
-            // any signature received?
-            VALIDATE(sigLength > 0, ERR_INVALID_DATA);
+            // sanity check, make sure we received a signature here
+            ASSERT(sigLength > 0);
 
             // calculate the V (parity) value
             signature->v = 27;

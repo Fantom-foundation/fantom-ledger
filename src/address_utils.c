@@ -63,9 +63,12 @@ size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, s
 
 // getRawAddress implements wallet address calculation for given public key.
 size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize) {
+    // building sanity checks
+    STATIC_ASSERT(RAW_ADDRESS_SIZE >= 20, "bad address size");
+    STATIC_ASSERT(ADDRESS_HASH_BUFFER_SIZE >= RAW_ADDRESS_SIZE, "bad address hash buffer size");
+
     // make sanity check, the buffer has to be at least this big
     ASSERT(outSize >= RAW_ADDRESS_SIZE);
-    ASSERT(ADDRESS_HASH_BUFFER_SIZE >= RAW_ADDRESS_SIZE);
 
     // make a buffer
     uint8_t hashAddress[ADDRESS_HASH_BUFFER_SIZE];
@@ -138,33 +141,4 @@ void addressFormatStr(uint8_t *address, size_t addrLen, cx_sha3_t *sha3Context, 
     out[0] = '0';
     out[1] = 'x';
     out[42] = '\0';
-}
-
-// byteFormatStr implements formatting of a raw byte buffer into a human readable hex form.
-void byteFormatStr(uint8_t *buffer, size_t bufLen, char *out, size_t outSize) {
-    // make sanity check, the buffer may never exceed this number
-    ASSERT(outSize < MAX_BUFFER_SIZE);
-
-    // make sanity check, is the input buffer of reasonable size
-    ASSERT(bufLen > 0);
-    ASSERT(bufLen <= 64);
-
-    // make sure the output will fit inside the buffer
-    ASSERT(outSize >= 3 + (2 * bufLen));
-
-    // clear the mem
-    os_memset(out, 0, outSize);
-
-    uint8_t i;
-
-    // prep base textual representation (convert BYTE to HEX)
-    for (i = 0; i < bufLen; i++) {
-        uint8_t digit = buffer[i];
-        out[(2 * i) + 2] = HEXDIGITS[(digit >> 4) & 0x0f];
-        out[(2 * i) + 3] = HEXDIGITS[digit & 0x0f];
-    }
-
-    // add address prefix and terminator
-    out[0] = '0';
-    out[1] = 'x';
 }

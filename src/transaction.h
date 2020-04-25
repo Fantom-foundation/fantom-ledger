@@ -40,6 +40,7 @@ typedef struct {
     tx_int256_t startGas;
     tx_int256_t value;
     tx_address_t recipient;
+    tx_address_t sender;
     tx_v_t v;
 } transaction_t;
 
@@ -49,10 +50,12 @@ uint32_t txGetV(transaction_t *tx);
 
 // txGetSignature implements ECDSA signature calculation of a transaction hash.
 void txGetSignature(
-        tx_signature_t *signature,
         bip44_path_t *path,
         uint8_t *hash,
-        size_t hashLength
+        size_t hashLength,
+        cx_sha3_t *sha3Context,
+        tx_address_t *sender,
+        tx_signature_t *signature
 );
 
 // txGetFormattedAmount creates human readable string representation of given int256 amount/value converted to FTM.

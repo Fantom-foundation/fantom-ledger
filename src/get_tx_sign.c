@@ -49,7 +49,8 @@ enum {
 
 // what UX steps we support for finishing the transaction signature
 enum {
-    UI_STEP_TX_RECIPIENT = 200,
+    UI_STEP_TX_SENDER = 200,
+    UI_STEP_TX_RECIPIENT,
     UI_STEP_TX_AMOUNT,
     UI_STEP_TX_FEE,
     UI_STEP_TX_CONFIRM,
@@ -145,16 +146,17 @@ static void runSignTransactionInitUIStep() {
         }
 
         case UI_STEP_INIT_RESPOND: {
-            // switch stage to receiving user input
-            ctx->stage = SIGN_STAGE_COLLECT;
-
             // respond to host that it's ok to send transaction for signing
             io_send_buf(SUCCESS, NULL, 0);
 
             // switch user interface to show that we are working on the tx
             ui_displayBusy();
 
-            // set invalid step so we never cycle around
+            // SIG: switch signing stage to collect tx data here
+            // we don't do it until we receive user's approval
+            ctx->stage = SIGN_STAGE_COLLECT;
+
+            // UX: set invalid step so we never cycle around
             ctx->uiStep = UI_STEP_INIT_INVALID;
             break;
         }
@@ -177,7 +179,7 @@ static void handleSignTxCollect(uint8_t p2, uint8_t *wireBuffer, size_t wireSize
     VALIDATE(p2 == 0, ERR_INVALID_PARAMETERS);
 
     // validate we received at least some data from remote host
-    VALIDATE(wireSize >= 1, ERR_INVALID_DATA);
+    VALIDATE(wireSize > 0, ERR_INVALID_DATA);
 
     // process the wire buffer with the tx stream
     tx_stream_status_e status = txStreamProcess(&ctx->stream, wireBuffer, wireSize, 0);
@@ -192,14 +194,14 @@ static void handleSignTxCollect(uint8_t p2, uint8_t *wireBuffer, size_t wireSize
             break;
         case TX_STREAM_FAULT:
             // the stream failed because the incoming data were incorrect
-            // let the case fall through down to ERR_INVALID_DATA
+            // let the case fall through down to sending ERR_INVALID_DATA
         default:
             // reset the context, the stream is in unknown state
             VALIDATE(false, ERR_INVALID_DATA);
     }
 
     // respond to the host to continue sending data
-    // we send the current stage to verify the progress
+    // we send the current stage so client can verify the parsing progress
     uint8_t res = ctx->stage;
     io_send_buf(SUCCESS, (uint8_t * ) & res, 1);
 
@@ -229,7 +231,7 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     security_policy_t policy = policyForSignTxFinalize();
     ASSERT_NOT_DENIED(policy);
 
-    // validate the value CHAIN_ID (transferred as v on incoming stream) of the transaction
+    // validate the value CHAIN_ID (transferred as <v> on incoming stream) of the transaction
     // We sign only Fantom chain messages to mitigate possible replay attacks.
     VALIDATE(txGetV(&ctx->tx) == EXPECTED_CHAIN_ID, ERR_INVALID_DATA);
 
@@ -238,7 +240,7 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     cx_hash((cx_hash_t * ) & ctx->sha3Context, CX_LAST, hash, 0, hash, TX_HASH_LENGTH);
 
     // get the transaction signature
-    txGetSignature(&ctx->signature, &ctx->path, hash, TX_HASH_LENGTH);
+    txGetSignature(&ctx->path, hash, TX_HASH_LENGTH, &ctx->sha3Context, &ctx->tx.sender, &ctx->signature);
 
     // mark the signature as ready
     ctx->responseReady = RESPONSE_READY_TAG;
@@ -246,7 +248,7 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     // decide what UI step to take first based on policy
     switch (policy) {
         case POLICY_PROMPT:
-            ctx->uiStep = UI_STEP_TX_RECIPIENT;
+            ctx->uiStep = UI_STEP_TX_SENDER;
             break;
         case POLICY_ALLOW:
             ctx->uiStep = UI_STEP_TX_RESPOND;
@@ -270,6 +272,31 @@ static void runSignTransactionUIStep() {
 
     // resume the stage based on previous result
     switch (ctx->uiStep) {
+        case UI_STEP_TX_SENDER: {
+            // make sure the advertised sender address length
+            // is well inside the address buffer size and that we do have one
+            ASSERT(ctx->tx.sender.length > 0);
+            ASSERT(ctx->tx.sender.length <= SIZEOF(ctx->tx.sender.value));
+
+            // create formatted address buffer and format for display
+            char addrStr[64];
+            addressFormatStr(
+                    ctx->tx.sender.value, ctx->tx.sender.length,
+                    &ctx->sha3Context,
+                    addrStr, sizeof(addrStr));
+
+            // display the recipient address
+            ui_displayPaginatedText(
+                    "Your address",
+                    addrStr,
+                    this_fn
+            );
+
+            // set next step
+            ctx->uiStep = UI_STEP_TX_RECIPIENT;
+            break;
+        }
+
         case UI_STEP_TX_RECIPIENT: {
             // make sure the advertised address length is well inside the address buffer size
             ASSERT(ctx->tx.recipient.length <= SIZEOF(ctx->tx.recipient.value));
@@ -379,7 +406,7 @@ static void runSignTransactionUIStep() {
 }
 
 // handleSignTransaction implements transaction signature processing proxy.
-// Each sign. request goes here first and this function decides where to send it next.
+// Each signing request goes here first and this function decides where to relay it next.
 void handleSignTransaction(
         uint8_t p1,
         uint8_t p2,
@@ -387,12 +414,19 @@ void handleSignTransaction(
         size_t wireSize,
         bool isOnInit
 ) {
-    // make sure the state is clean
+    // make sure the internal state is clean before
+    // we jump into any signing business
     if (isOnInit) {
         os_memset(ctx, 0, SIZEOF(*ctx));
     }
 
     // decide based on the p1 value
+    // the protocol stages are strict:
+    // 1) <INIT> starts the process
+    // 2) <DATA> collects transaction from one, or more APDU
+    // 3) <FINALIZE> collects the tx hash, asks user for approval
+    //    and send the signature back to host
+    // Current stage is asserted inside the sub-handler as the first thing
     switch (p1) {
         case P1_NEW_TRANSACTION:
             handleSignTxInit(p2, wireBuffer, wireSize);
