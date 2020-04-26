@@ -42,6 +42,7 @@ typedef struct {
     tx_address_t recipient;
     tx_address_t sender;
     tx_v_t v;
+    bool isContractCall;
 } transaction_t;
 
 // txGetV implements transaction "v" value calculator.

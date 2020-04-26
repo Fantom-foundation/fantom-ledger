@@ -327,6 +327,18 @@ static tx_stream_status_e txStreamParseFieldProxy(tx_stream_context_t *stream) {
             txStreamProcessAddressField(stream, &stream->tx->recipient, TX_MAX_ADDRESS_LENGTH);
             break;
         case TX_RLP_DATA:
+            // if we are on the beginning of the field, try to detect
+            // smart contract call by calculating the data length rounding
+            if (stream->currentFieldPos == 0) {
+                // The data must contain at least signature and one parameter to qualify.
+                // We do not consider no-param calls to lower the chance for false positives.
+                // A contract call contains 4 bytes of method signature
+                // plus list of params each padded to 32 bytes.
+                stream->tx->isContractCall = (stream->currentFieldLength >= 4) &&
+                                              ((stream->currentFieldLength - 4) % 32 == 0);
+            }
+
+            // process data as a general field, we don't need the content
             txStreamProcessGeneralField(stream);
             break;
         case TX_RLP_V:

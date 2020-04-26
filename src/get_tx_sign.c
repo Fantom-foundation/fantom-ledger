@@ -53,6 +53,7 @@ enum {
     UI_STEP_TX_RECIPIENT,
     UI_STEP_TX_AMOUNT,
     UI_STEP_TX_FEE,
+    UI_STEP_TX_CONTRACT_CALL,
     UI_STEP_TX_CONFIRM,
     UI_STEP_TX_RESPOND,
     UI_STEP_TX_INVALID,
@@ -248,7 +249,7 @@ static void handleSignTxFinalize(uint8_t p2, uint8_t *wireBuffer MARK_UNUSED, si
     // decide what UI step to take first based on policy
     switch (policy) {
         case POLICY_PROMPT:
-            ctx->uiStep = UI_STEP_TX_SENDER;
+            ctx->uiStep = UI_STEP_TX_RECIPIENT;
             break;
         case POLICY_ALLOW:
             ctx->uiStep = UI_STEP_TX_RESPOND;
@@ -272,6 +273,35 @@ static void runSignTransactionUIStep() {
 
     // resume the stage based on previous result
     switch (ctx->uiStep) {
+
+        case UI_STEP_TX_RECIPIENT: {
+            // make sure the advertised address length is well inside the address buffer size
+            ASSERT(ctx->tx.recipient.length <= SIZEOF(ctx->tx.recipient.value));
+
+            // create formatted address buffer and format for display
+            char addrStr[64];
+            if (ctx->tx.recipient.length > 0) {
+                addressFormatStr(
+                        ctx->tx.recipient.value, ctx->tx.recipient.length,
+                        &ctx->sha3Context,
+                        addrStr, sizeof(addrStr));
+            } else {
+                // smart contract targeted transaction
+                strcpy(addrStr, "New Contract");
+            }
+
+            // display the recipient address
+            ui_displayPaginatedText(
+                    "Send To",
+                    addrStr,
+                    this_fn
+            );
+
+            // set next step
+            ctx->uiStep = UI_STEP_TX_SENDER;
+            break;
+        }
+
         case UI_STEP_TX_SENDER: {
             // make sure the advertised sender address length
             // is well inside the address buffer size and that we do have one
@@ -287,35 +317,7 @@ static void runSignTransactionUIStep() {
 
             // display the sender (derived from path) address
             ui_displayPaginatedText(
-                    "Your address",
-                    addrStr,
-                    this_fn
-            );
-
-            // set next step
-            ctx->uiStep = UI_STEP_TX_RECIPIENT;
-            break;
-        }
-
-        case UI_STEP_TX_RECIPIENT: {
-            // make sure the advertised address length is well inside the address buffer size
-            ASSERT(ctx->tx.recipient.length <= SIZEOF(ctx->tx.recipient.value));
-
-            // create formatted address buffer and format for display
-            char addrStr[64];
-            if (ctx->tx.recipient.length > 0) {
-                addressFormatStr(
-                        ctx->tx.recipient.value, ctx->tx.recipient.length,
-                        &ctx->sha3Context,
-                        addrStr, sizeof(addrStr));
-            } else {
-                // smart contract targeted transaction
-                strcpy(addrStr, "Contract");
-            }
-
-            // display the recipient address
-            ui_displayPaginatedText(
-                    "Recipient",
+                    "Send From",
                     addrStr,
                     this_fn
             );
@@ -356,8 +358,21 @@ static void runSignTransactionUIStep() {
 
             // display max fee for the transaction
             ui_displayPaginatedText(
-                    "Max fee (FTM)",
+                    "Max Fee (FTM)",
                     valueStr,
+                    this_fn
+            );
+
+            // set next step (for detected contract call show the info)
+            ctx->uiStep = (ctx->tx.isContractCall ? UI_STEP_TX_CONTRACT_CALL : UI_STEP_TX_CONFIRM);
+            break;
+        }
+
+        case UI_STEP_TX_CONTRACT_CALL: {
+            // display the warning
+            ui_displayPaginatedText(
+                    "Smart Contract",
+                    "Call Found.",
                     this_fn
             );
 
@@ -370,7 +385,7 @@ static void runSignTransactionUIStep() {
             // ask user to confirm the key export
             ui_displayPrompt(
                     "Send",
-                    "transaction?",
+                    "Transaction?",
                     this_fn,
                     ui_respondWithUserReject
             );
