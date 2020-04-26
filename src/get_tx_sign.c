@@ -122,7 +122,7 @@ static void runSignTransactionInitUIStep() {
         case UI_STEP_INIT_WARNING: {
             // display the warning
             ui_displayPaginatedText(
-                    "Unusual request",
+                    "Unusual Request",
                     "Be careful!",
                     this_fn
             );
@@ -135,8 +135,8 @@ static void runSignTransactionInitUIStep() {
         case UI_STEP_INIT_CONFIRM: {
             // ask user to confirm the key export
             ui_displayPrompt(
-                    "Start new",
-                    "transaction?",
+                    "Start New",
+                    "Transaction?",
                     this_fn,
                     ui_respondWithUserReject
             );
@@ -372,7 +372,7 @@ static void runSignTransactionUIStep() {
             // display the warning
             ui_displayPaginatedText(
                     "Smart Contract",
-                    "Call Found.",
+                    "Call Found",
                     this_fn
             );
 

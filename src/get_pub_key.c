@@ -99,7 +99,7 @@ static void runGetPublicKeyUIStep() {
         case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
-                    "Unusual request",
+                    "Unusual Request",
                     "Be careful!",
                     this_fn
             );
@@ -116,7 +116,7 @@ static void runGetPublicKeyUIStep() {
 
             // display BIP44 path
             ui_displayPaginatedText(
-                    "Exporting key",
+                    "Exporting Key",
                     pathStr,
                     this_fn
             );
@@ -130,7 +130,7 @@ static void runGetPublicKeyUIStep() {
             // ask user to confirm the key export
             ui_displayPrompt(
                     "Confirm",
-                    "key export?",
+                    "Key Export?",
                     this_fn,
                     ui_respondWithUserReject
             );

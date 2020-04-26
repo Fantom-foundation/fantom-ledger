@@ -108,7 +108,7 @@ static void runGetAddressUIStep() {
         case UI_STEP_WARNING: {
             // display the warning
             ui_displayPaginatedText(
-                    "Unusual request",
+                    "Unusual Request",
                     "Be careful!",
                     this_fn
             );
@@ -125,7 +125,7 @@ static void runGetAddressUIStep() {
 
             // display BIP44 path
             ui_displayPaginatedText(
-                    "Address path",
+                    "Address Path",
                     pathStr,
                     this_fn
             );
@@ -159,7 +159,7 @@ static void runGetAddressUIStep() {
             // ask user to confirm the key export
             ui_displayPrompt(
                     "Confirm",
-                    "address?",
+                    "Address?",
                     this_fn,
                     ui_respondWithUserReject
             );
