@@ -127,7 +127,7 @@ UX_STEP_CB(
     ui_rejectPrompt(),
     ITEMS(
         &C_icon_crossmark,
-        "Reject?"
+        "Reject"
     )
 );
 

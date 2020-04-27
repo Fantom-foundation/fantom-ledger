@@ -372,7 +372,7 @@ static void runSignTransactionUIStep() {
             // display the warning
             ui_displayPaginatedText(
                     "Smart Contract",
-                    "Call Found",
+                    "Alert",
                     this_fn
             );
 
