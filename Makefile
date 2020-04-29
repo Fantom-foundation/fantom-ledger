@@ -89,7 +89,7 @@ DEFINES       += HAVE_UX_FLOW
 DEFINES += RESET_ON_CRASH
 
 # Enabling debug PRINTF
-DEBUG = 1
+DEBUG = 0
 ifneq ($(DEBUG),0)
         ifeq ($(TARGET_NAME),TARGET_NANOX)
                 DEFINES   += DEVEL HAVE_PRINTF PRINTF=mcu_usb_printf
