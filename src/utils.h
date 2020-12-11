@@ -23,10 +23,6 @@
 // Safe version of SIZEOF, does not compile if you accidentally supply a pointer.
 #define SIZEOF(var) (sizeof(var) + SIZEOF_NOT_A_PTR(var))
 
-// Validate the expression type.
-#define ASSERT_TYPE(expr, expected_type) \
-    STATIC_ASSERT( __builtin_types_compatible_p(__typeof__((expr)), expected_type), "Wrong type")
-
 // Given that memset is root of many problems, a bit of paranoia is good.
 #define MEMCLEAR(ptr, expected_type) \
     do { \

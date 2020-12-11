@@ -163,7 +163,7 @@ void bip44_pathToStr(const bip44_path_t *path, char *out, size_t outSize) {
         /* make sure we have enough space left */ \
         ASSERT(ptr <= end); \
         /* make sure the buffer is of the right type */ \
-        STATIC_ASSERT(sizeof(end - ptr) == sizeof(size_t), "bad size_t size"); \
+        ASSERT(sizeof(end - ptr) == sizeof(size_t)); \
         /* how much space do we have left */ \
         size_t availableSize = (size_t) (end - ptr); \
         /* push the formatted string */ \

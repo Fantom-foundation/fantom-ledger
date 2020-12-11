@@ -25,7 +25,7 @@ APP_LOAD_PARAMS= --curve secp256k1 --path "44'/60'" --appFlags 0x240 $(COMMON_LO
 
 APPVERSION_M=1
 APPVERSION_N=0
-APPVERSION_P=4
+APPVERSION_P=5
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 APPNAME = "Fantom FTM"
 
@@ -46,11 +46,15 @@ all: default
 ############
 # Platform #
 ############
-
 DEFINES   += OS_IO_SEPROXYHAL
 DEFINES   += HAVE_BAGL HAVE_SPRINTF
-DEFINES   += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 DEFINES   += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P)
+
+DEFINES   += UNUSED\(x\)=\(void\)x
+DEFINES   += APPVERSION=\"$(APPVERSION)\"
+
+# USB HID
+DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=4 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 
 # U2F
 DEFINES   += HAVE_U2F HAVE_IO_U2F
@@ -58,34 +62,32 @@ DEFINES   += U2F_PROXY_MAGIC=\"FTM\"
 DEFINES   += USB_SEGMENT_SIZE=64
 DEFINES   += BLE_SEGMENT_SIZE=32 #max MTU, min 20
 
-WEBUSB_URL     = pwawallet.fantom.network
-DEFINES       += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | wc -c) WEBUSB_URL=$(shell echo -n $(WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
-
-DEFINES   += UNUSED\(x\)=\(void\)x
-DEFINES   += APPVERSION=\"$(APPVERSION)\"
+# WebUSB
+DEFINES   += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
 
 # Protect stack overflows
 DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
+# Bluetooth
 ifeq ($(TARGET_NAME),TARGET_NANOX)
-DEFINES   	  += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
-DEFINES       += HAVE_BLE_APDU # basic ledger apdu transport over BLE
+    DEFINES   	  += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+    DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
+    DEFINES       += HAVE_BLE_APDU # basic ledger apdu transport over BLE
 
-DEFINES       += HAVE_GLO096
-DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
-DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+    DEFINES       += HAVE_GLO096
+    DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+    DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
+    DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+    DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+    DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
 else
-DEFINES   	  += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+    DEFINES   	  += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 endif
 
 # Both nano S and X benefit from the flow.
 DEFINES       += HAVE_UX_FLOW
 
-
+# Reset the device on crash
 DEFINES += RESET_ON_CRASH
 
 # Enabling debug PRINTF
@@ -103,20 +105,6 @@ endif
 ##############
 #  Compiler  #
 ##############
-ifneq ($(BOLOS_ENV),)
-$(info BOLOS_ENV=$(BOLOS_ENV))
-CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
-GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
-else
-$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
-endif
-ifeq ($(CLANGPATH),)
-$(info CLANGPATH is not set: clang will be used from PATH)
-endif
-ifeq ($(GCCPATH),)
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
-endif
-
 CC       := $(CLANGPATH)clang
 
 #CFLAGS   += -O0
@@ -160,7 +148,6 @@ include $(BOLOS_SDK)/Makefile.rules
 
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
-
 
 
 listvariants:
