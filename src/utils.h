@@ -26,7 +26,7 @@
 // Given that memset is root of many problems, a bit of paranoia is good.
 #define MEMCLEAR(ptr, expected_type) \
     do { \
-        STATIC_ASSERT(sizeof(expected_type) == sizeof(*(ptr)), "bad memclear parameters"); \
+        ASSERT(sizeof(expected_type) == sizeof(*(ptr))); \
         os_memset(ptr, 0, sizeof(expected_type)); \
     } while(0)
 

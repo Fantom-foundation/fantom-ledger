@@ -27,7 +27,6 @@ fi
 if [ ! -d dev-env ]; then
     # toolchain elements
     GCC_ARCHIVE="gcc-arm-none-eabi-5_3-2016q1-20160330-linux.tar.bz2"
-    CLANG4_ARCHIVE="clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.10.tar.xz"
     CLANG7_ARCHIVE="clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz"
     LEDGER_BLUE_SDK_ARCHIVE="blue-r21.1.tar.gz"
     LEDGER_NANOS_SDK_ARCHIVE="nanos-1612.tar.gz"
@@ -46,32 +45,25 @@ if [ ! -d dev-env ]; then
 
     # prepare GCC
     echo "Preparing GCC ..."
-    if [ ! -f ${GCC_ARCHIVE} ]; then
+    if [ ! -f "toolchain/${GCC_ARCHIVE}" ]; then
         wget "https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q1-update/+download/${GCC_ARCHIVE}" -O "toolchain/${GCC_ARCHIVE}"
     fi
     tar xf "toolchain/${GCC_ARCHIVE}" -C ./
     cp -r gcc-arm-none-eabi-5_3-2016q1 dev-env/CC/nanox/gcc-arm-none-eabi-5_3-2016q1
     mv gcc-arm-none-eabi-5_3-2016q1 dev-env/CC/others/gcc-arm-none-eabi-5_3-2016q1
 
-    # clang 4.0
-    echo "Preparing LLVM v4 ..."
-    if [ ! -f ${CLANG4_ARCHIVE} ]; then
-        wget "http://releases.llvm.org/4.0.0/${CLANG4_ARCHIVE}" -O "toolchain/${CLANG4_ARCHIVE}"
-    fi
-    tar xf "toolchain/${CLANG4_ARCHIVE}" -C ./
-    mv "clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.10" dev-env/CC/others/clang-arm-fropi
-
     # clang 7.0
     echo "Preparing LLVM v7 ..."
-    if [ ! -f ${CLANG7_ARCHIVE} ]; then
+    if [ ! -f "toolchain/${CLANG7_ARCHIVE}" ]; then
         wget "http://releases.llvm.org/7.0.0/${CLANG7_ARCHIVE}" -O "toolchain/${CLANG7_ARCHIVE}"
     fi
     tar xf "toolchain/${CLANG7_ARCHIVE}" -C ./
+    cp -r "clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04" dev-env/CC/others/clang-arm-fropi
     mv "clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04" dev-env/CC/nanox/clang-arm-fropi
 
     # Blue SDK
     echo "Preparing Blue SDK ..."
-    if [ ! -f ${LEDGER_BLUE_SDK_ARCHIVE} ]; then
+    if [ ! -f "toolchain/${LEDGER_BLUE_SDK_ARCHIVE}" ]; then
         wget "https://github.com/LedgerHQ/blue-secure-sdk/archive/${LEDGER_BLUE_SDK_ARCHIVE}" -O "toolchain/${LEDGER_BLUE_SDK_ARCHIVE}"
     fi
     tar xf "toolchain/${LEDGER_BLUE_SDK_ARCHIVE}" -C ./
@@ -79,7 +71,7 @@ if [ ! -d dev-env ]; then
 
     # NanoS SDK
     echo "Preparing Nano-S SDK ..."
-    if [ ! -f ${LEDGER_NANOS_SDK_ARCHIVE} ]; then
+    if [ ! -f "toolchain/${LEDGER_NANOS_SDK_ARCHIVE}" ]; then
         wget "https://github.com/LedgerHQ/nanos-secure-sdk/archive/${LEDGER_NANOS_SDK_ARCHIVE}" -O "toolchain/${LEDGER_NANOS_SDK_ARCHIVE}"
     fi
     tar xf "toolchain/${LEDGER_NANOS_SDK_ARCHIVE}" -C ./

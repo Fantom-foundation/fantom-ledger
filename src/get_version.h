@@ -9,6 +9,8 @@
 #error "Missing -DAPPVERSION=x.y.z in Makefile"
 #endif
 
+#define ASSERT_IS_DIGIT(d) ASSERT(APPVERSION[d] >= '0' && APPVERSION[d] <= '9')
+
 // handleGetVersion implements handler for Get Version APDU instruction.
 handler_fn_t handleGetVersion;
 
