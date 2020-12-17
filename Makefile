@@ -22,6 +22,7 @@ include $(BOLOS_SDK)/Makefile.defines
 
 DEFINES_LIB = USE_LIB_ETHEREUM
 APP_LOAD_PARAMS= --curve secp256k1 --path "44'/60'" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
+APP_LOAD_PARAMS += --tlvraw 9F:01
 
 APPVERSION_M=1
 APPVERSION_N=0
