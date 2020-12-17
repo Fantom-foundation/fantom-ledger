@@ -4,10 +4,10 @@ debug
 dep
 obj
 dev-env
+toolchain/
 src/glyphs.c
 src/glyphs.h
 
 # Rule out IDE-s
 .idea
 .vscode
-

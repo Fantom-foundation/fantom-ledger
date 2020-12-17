@@ -41,7 +41,7 @@ void ui_idle(void) {
     ux_flow_init(0, ux_idle_flow, NULL);
 #else
     // unknown device?
-    STATIC_ASSERT(false);
+    STATIC_ASSERT(false, "unknown target device");
 #endif
 }
 

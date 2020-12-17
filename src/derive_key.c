@@ -33,7 +33,7 @@ void derivePrivateKey(
     uint8_t privateKeyRawBuffer[RAW_PRIVATE_KEY_BUFFER];
 
     // make sure we can safely erase chain code container since it's the right size
-    STATIC_ASSERT(SIZEOF(chainCode->code) == CHAIN_CODE_SIZE, "bad chain code length");
+    ASSERT(SIZEOF(chainCode->code) == CHAIN_CODE_SIZE);
     os_memset(chainCode->code, 0, SIZEOF(chainCode->code));
 
     // do the extraction
@@ -45,7 +45,7 @@ void derivePrivateKey(
             STATIC_ASSERT(CX_APILEVEL >= API_LEVEL_MIN, "unsupported api level");
 
             // make sure the private key is of expected size
-            STATIC_ASSERT(SIZEOF(privateKey->d) == RAW_PRIVATE_KEY_SIZE, "bad private key length");
+            ASSERT(SIZEOF(privateKey->d) == RAW_PRIVATE_KEY_SIZE);
 
             // call for private key derivation
             io_seproxyhal_io_heartbeat();
@@ -85,7 +85,7 @@ void extractRawPublicKey(
         uint8_t *outBuffer, size_t outSize
 ) {
     // make sure the public key size is what we expect here
-    STATIC_ASSERT(SIZEOF(publicKey->W) == 65, "bad public key length");
+    ASSERT(SIZEOF(publicKey->W) == 65);
 
     // make sure the output buffer size corresponds with expected key size
     ASSERT(outSize == PUBLIC_KEY_SIZE);
@@ -113,7 +113,7 @@ void deriveExtendedPublicKey(
 
     // make sure the output structure is of the right dimension
     // the 1st byte is for public key length, others are for the public key and chain code
-    STATIC_ASSERT(SIZEOF(*out) == 1 + PUBLIC_KEY_SIZE + CHAIN_CODE_SIZE, "bad ext pub key size");
+    ASSERT(SIZEOF(*out) == 1 + PUBLIC_KEY_SIZE + CHAIN_CODE_SIZE);
 
     BEGIN_TRY
     {
@@ -133,17 +133,17 @@ void deriveExtendedPublicKey(
             deriveRawPublicKey(&privateKey, &publicKey);
 
             // make sure the public key size corresponds with our expectation
-            STATIC_ASSERT(SIZEOF(out->publicKey) == PUBLIC_KEY_SIZE, "bad pub key size");
+            ASSERT(SIZEOF(out->publicKey) == PUBLIC_KEY_SIZE);
 
             // extract the public key data to the output buffer
             extractRawPublicKey(&publicKey, out->publicKey, SIZEOF(out->publicKey));
             out->length = PUBLIC_KEY_SIZE;
 
             // make sure the chain code container size is what we expect
-            STATIC_ASSERT(CHAIN_CODE_SIZE == SIZEOF(out->chainCode), "bad chain code size");
+            ASSERT(CHAIN_CODE_SIZE == SIZEOF(out->chainCode));
 
             // make sure the chain code source data is of the expected size
-            STATIC_ASSERT(CHAIN_CODE_SIZE == SIZEOF(chainCode.code), "bad chain code size");
+            ASSERT(CHAIN_CODE_SIZE == SIZEOF(chainCode.code));
 
             // chain code is placed after the public key
             os_memmove(out->chainCode, chainCode.code, CHAIN_CODE_SIZE);

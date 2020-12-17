@@ -1,7 +1,6 @@
 #include "common.h"
 #include "get_address.h"
 #include "derive_key.h"
-#include "endian.h"
 #include "state.h"
 #include "policy.h"
 #include "ui_helpers.h"

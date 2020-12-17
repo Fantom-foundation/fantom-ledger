@@ -57,10 +57,10 @@ void txGetSignature(
     uint8_t sig[100];
 
     // make sure the signature is of expected length (v + r + s)
-    STATIC_ASSERT(SIZEOF(*signature) == 1 + TX_SIGNATURE_HASH_LENGTH + TX_SIGNATURE_HASH_LENGTH, "bad signature size");
+    ASSERT(SIZEOF(*signature) == 1 + TX_SIGNATURE_HASH_LENGTH + TX_SIGNATURE_HASH_LENGTH);
 
     // make sure the space for the derived sender address is enough
-    STATIC_ASSERT(SIZEOF(*sender) == 1 + TX_MAX_ADDRESS_LENGTH, "bad sender address size");
+    ASSERT(SIZEOF(*sender) == 1 + TX_MAX_ADDRESS_LENGTH);
 
     // validate hash size
     ASSERT(hashLength == TX_HASH_LENGTH);

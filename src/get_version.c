@@ -19,12 +19,9 @@ void handleGetVersion(
         size_t wireDataSize,
         bool isNewCall MARK_UNUSED
 ) {
-#define ASSERT_IS_DIGIT(d) STATIC_ASSERT(APPVERSION[d] >= '0' && APPVERSION[d] <= '9', "bad digit in APPVERSION")
-
     // Validate the version size and format.
     // The expected format is <single digit>.<single digit>.<single digit>
     // and total length of the version string is than 5 glyphs plus string terminator.
-    STATIC_ASSERT(SIZEOF(APPVERSION) == 5 + 1, "bad APPVERSION length");
     ASSERT_IS_DIGIT(0);
     ASSERT_IS_DIGIT(2);
     ASSERT_IS_DIGIT(4);
@@ -51,10 +48,10 @@ void handleGetVersion(
             .flags = 0,
     };
 
-    #ifdef DEVEL
+#ifdef DEVEL
     // apply development flag to the response if needed
     response.flags |= FLAG_DEVELOPMENT_VERSION;
-    #endif
+#endif
 
     // send the structure to host by i/o exchange helper
     io_send_buf(SUCCESS, (uint8_t * ) & response, sizeof(response));

@@ -7,9 +7,6 @@
 // declare the actual function we use for assertion processing
 extern void assert(int cond, const char *msgStr);
 
-// substitutes function above, but it's more eye catching
-#define ASSERT_WITH_MSG(cond, msg) assert(cond, msg)
-
 // max length of an assert we allow
 #define _MAX_ASSERT_LENGTH_ 25
 
