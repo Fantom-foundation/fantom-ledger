@@ -1,4 +1,5 @@
 #include <os_io_seproxyhal.h>
+#include <ux.h>
 #include "ui_helpers.h"
 #include "glyphs.h"
 
@@ -25,7 +26,7 @@ void ui_confirmPaginatedText() {
 // Here we initialize paginated layout with confirmation callback.
 UX_STEP_CB(
     ux_paginated_text_flow_paginated,
-    paging,
+    bnnn_paging,
     ui_confirmPaginatedText(),
     ITEMS(
         (char *)&displayState.paginatedText.header,
@@ -67,7 +68,7 @@ void ui_doDisplayPaginatedText() {
         ux_flow_init(0, ux_short_text_flow, NULL);
     } else {
         // reset the pagination and display paginated flow defined above
-        ux_layout_paging_reset();
+        ux_layout_bnnn_paging_reset();
         ux_flow_init(0, ux_paginated_text_flow, NULL);
     }
 }
