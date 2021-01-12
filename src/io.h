@@ -2,6 +2,7 @@
 #define FANTOM_LEDGER_IO_H
 
 #include <os_io_seproxyhal.h>
+#include <ux.h>
 #include <stdint.h>
 
 // The program is always waiting for either APDU i/o, or user input.
