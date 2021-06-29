@@ -432,7 +432,7 @@ void handleSignTransaction(
     // make sure the internal state is clean before
     // we jump into any signing business
     if (isOnInit) {
-        os_memset(ctx, 0, SIZEOF(*ctx));
+        memset(ctx, 0, SIZEOF(*ctx));
     }
 
     // decide based on the p1 value

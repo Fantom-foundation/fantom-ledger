@@ -113,8 +113,8 @@ void ui_displayPrompt(
     ui_prompt_state_t *ctx = promptState;
 
     // copy strings from source to the state structure (including string terminator)
-    os_memmove(ctx->header, headerStr, header_len + 1);
-    os_memmove(ctx->text, bodyStr, text_len + 1);
+    memcpy(ctx->header, headerStr, header_len + 1);
+    memcpy(ctx->text, bodyStr, text_len + 1);
 
     // initialize the callback structure
     ui_CallbackInit(&ctx->callback, confirm, reject);
@@ -151,8 +151,8 @@ void ui_displayPaginatedText(
     ui_paginated_text_state_t *ctx = paginatedTextState;
 
     // copy strings from source to the state structure (including string terminator)
-    os_memmove(ctx->header, headerStr, header_len);
-    os_memmove(ctx->text, bodyStr, body_len);
+    memcpy(ctx->header, headerStr, header_len);
+    memcpy(ctx->text, bodyStr, body_len);
 
     // initialize callback; we don't need rejection callback
     // since user is not deciding anything here

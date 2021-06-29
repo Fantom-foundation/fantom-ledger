@@ -154,7 +154,7 @@ void txGetSignature(
         {
             // clean up the private key in memory so we don't leek it in any way and shape
             // do we need to do that if we re-throw? let's better be safe than sorry with PKs.
-            os_memset(&privateKey, 0, SIZEOF(privateKey));
+            explicit_bzero(&privateKey, SIZEOF(privateKey));
 
             // re-throw the exception so it's collected in the main loop
             THROW(e);
@@ -162,7 +162,7 @@ void txGetSignature(
         FINALLY
         {
             // clean up the private key in memory so we don't leek it in any way
-            os_memset(&privateKey, 0, SIZEOF(privateKey));
+            explicit_bzero(&privateKey, SIZEOF(privateKey));
         }
     }
     END_TRY;

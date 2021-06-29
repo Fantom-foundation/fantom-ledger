@@ -41,7 +41,7 @@ void handleGetAddress(
 ) {
     // make sure the state is clean
     if (isOnInit) {
-        os_memset(ctx, 0, SIZEOF(*ctx));
+        memset(ctx, 0, SIZEOF(*ctx));
     }
 
     // clear the response ready tag
