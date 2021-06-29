@@ -26,7 +26,7 @@ uint32_t txGetV(transaction_t *tx) {
     uint32_t v = 0;
 
     // validate the V value length
-    VALIDATE(tx->v.length >= 0 && tx->v.length <= 4, ERR_INVALID_DATA);
+    VALIDATE(tx->v.length <= 4, ERR_INVALID_DATA);
 
     // any V present?
     if (tx->v.length > 0) {
