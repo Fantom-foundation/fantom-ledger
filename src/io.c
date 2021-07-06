@@ -34,6 +34,7 @@ void _io_send_G_io_apdu_buffer(uint16_t code, uint16_t tx) {
     io_state = IO_EXPECT_IO;
 }
 
+#ifndef FUZZING
 // io_send_buf implements sending from an internal buffer by copying the data
 // to G_io_apdu_buffer and than calling the i/o exchange
 void io_send_buf(uint16_t code, const uint8_t *buffer, size_t bufferSize) {
@@ -44,6 +45,7 @@ void io_send_buf(uint16_t code, const uint8_t *buffer, size_t bufferSize) {
     memcpy(G_io_apdu_buffer, buffer, bufferSize);
     _io_send_G_io_apdu_buffer(code, bufferSize);
 }
+#endif
 
 // --------------------------------------------
 // Everything below this point is Ledger magic.

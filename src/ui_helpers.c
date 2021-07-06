@@ -124,8 +124,10 @@ void ui_displayPrompt(
 
     // validate the i/o state we are in and set it to waiting for user interaction
     ASSERT(io_state == IO_EXPECT_NONE || io_state == IO_EXPECT_UI);
+    #ifndef FUZZING
     io_state = IO_EXPECT_UI;
-
+    #endif
+    
     // change the UX flow to the configured prompt screen
     ui_doDisplayPrompt();
 }
@@ -163,7 +165,9 @@ void ui_displayPaginatedText(
 
     // validate the i/o state we are in and set it to waiting for user interaction
     ASSERT(io_state == IO_EXPECT_NONE || io_state == IO_EXPECT_UI);
+    #ifndef FUZZING
     io_state = IO_EXPECT_UI;
+    #endif
 
     // change the UX flow to configured paginated text
     ui_doDisplayPaginatedText();
