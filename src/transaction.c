@@ -65,6 +65,7 @@ void txGetSignature(
     // validate hash size
     ASSERT(hashLength == TX_HASH_LENGTH);
 
+    #ifndef FUZZING
     // do the extraction
     BEGIN_TRY
     {
@@ -166,6 +167,7 @@ void txGetSignature(
         }
     }
     END_TRY;
+    #endif
 }
 
 // adjustDecimals adjust decimal places for the given decimal number.
