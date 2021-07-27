@@ -15,6 +15,8 @@
 #include "errors.h"
 #include "uint256.h"
 
+#include <string.h>
+
 // HEXDIGITS declares a list of hexadecimal digits.
 static const char HEXDIGITS[] = "0123456789abcdef";
 
@@ -510,8 +512,8 @@ void uint256ConvertBE(uint256_t *out, const uint8_t *data, size_t length) {
     // so we copy it to a local buffer padding the value with
     // zeros from left before doing conversion
     uint8_t tmp[32];
-    os_memset(tmp, 0, 32);
-    os_memmove(tmp + 32 - length, data, length);
+    memset(tmp, 0, 32);
+    memcpy(tmp + 32 - length, data, length);
 
     // read in the 256 bit value
     readUint256BE(out, tmp, sizeof(tmp));

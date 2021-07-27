@@ -129,7 +129,9 @@ static void runSignTransactionInitUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_INIT_CONFIRM;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_INIT_CONFIRM: {
@@ -143,7 +145,9 @@ static void runSignTransactionInitUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_INIT_RESPOND;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_INIT_RESPOND: {
@@ -299,7 +303,9 @@ static void runSignTransactionUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_TX_SENDER;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_TX_SENDER: {
@@ -324,7 +330,9 @@ static void runSignTransactionUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_TX_AMOUNT;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_TX_AMOUNT: {
@@ -344,7 +352,9 @@ static void runSignTransactionUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_TX_FEE;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_TX_FEE: {
@@ -365,7 +375,9 @@ static void runSignTransactionUIStep() {
 
             // set next step (for detected contract call show the info)
             ctx->uiStep = (ctx->tx.isContractCall ? UI_STEP_TX_CONTRACT_CALL : UI_STEP_TX_CONFIRM);
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_TX_CONTRACT_CALL: {
@@ -378,7 +390,9 @@ static void runSignTransactionUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_TX_CONFIRM;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_TX_CONFIRM: {
@@ -392,7 +406,9 @@ static void runSignTransactionUIStep() {
 
             // set next step
             ctx->uiStep = UI_STEP_TX_RESPOND;
+            #ifndef FUZZING
             break;
+            #endif
         }
 
         case UI_STEP_TX_RESPOND: {
@@ -432,7 +448,7 @@ void handleSignTransaction(
     // make sure the internal state is clean before
     // we jump into any signing business
     if (isOnInit) {
-        os_memset(ctx, 0, SIZEOF(*ctx));
+        memset(ctx, 0, SIZEOF(*ctx));
     }
 
     // decide based on the p1 value

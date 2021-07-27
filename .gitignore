@@ -7,6 +7,9 @@ dev-env
 toolchain/
 src/glyphs.c
 src/glyphs.h
+fuzzing/build*
+fuzzing/corpus/
+fuzzing/coverage/
 
 # Rule out IDE-s
 .idea

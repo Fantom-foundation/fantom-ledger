@@ -37,7 +37,7 @@ void handleGetPublicKey(
 ) {
     // make sure the state is clean
     if (isOnInit) {
-        os_memset(ctx, 0, SIZEOF(*ctx));
+        memset(ctx, 0, SIZEOF(*ctx));
     }
 
     // extra reset the response mark

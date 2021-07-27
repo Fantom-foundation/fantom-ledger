@@ -30,7 +30,7 @@ void CHECK_RESPONSE_SIZE(unsigned int tx);
 void _io_send_G_io_apdu_buffer(uint16_t code, uint16_t tx);
 
 // io_send_buf implements sending APDU response from an internal buffer.
-void io_send_buf(uint16_t code, uint8_t *buffer, size_t bufferSize);
+void io_send_buf(uint16_t code, const uint8_t *buffer, size_t bufferSize);
 
 // ----------------------------------------------
 // Everything below this point is Ledger magic.

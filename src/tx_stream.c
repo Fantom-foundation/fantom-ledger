@@ -24,7 +24,7 @@ void txStreamInit(
         transaction_t *tx
 ) {
     // clear the context
-    os_memset(stream, 0, sizeof(tx_stream_context_t));
+    memset(stream, 0, sizeof(tx_stream_context_t));
 
     // assign SHA3 and init the SHA3 context
     stream->sha3Context = sha3Context;
@@ -83,7 +83,7 @@ static void txStreamCopyData(tx_stream_context_t *stream, uint8_t *out, size_t l
         ASSERT(length < MAX_BUFFER_SIZE);
 
         // transfer the data
-        os_memmove(out, stream->workBuffer, length);
+        memcpy(out, stream->workBuffer, length);
     }
 
     // add the data hash to SHA3 context if appropriate

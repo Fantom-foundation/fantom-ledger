@@ -109,7 +109,6 @@ endif
 ##############
 CC       := $(CLANGPATH)clang
 
-#CFLAGS   += -O0
 CFLAGS   += -O3 -Os -Wall -Wextra -Wuninitialized
 
 AS     := $(GCCPATH)arm-none-eabi-gcc
