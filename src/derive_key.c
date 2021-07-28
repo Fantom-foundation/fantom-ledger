@@ -34,7 +34,7 @@ void derivePrivateKey(
 
     // make sure we can safely erase chain code container since it's the right size
     ASSERT(SIZEOF(chainCode->code) == CHAIN_CODE_SIZE);
-    os_memset(chainCode->code, 0, SIZEOF(chainCode->code));
+    memset(chainCode->code, 0, SIZEOF(chainCode->code));
 
     // do the extraction
     BEGIN_TRY
@@ -63,7 +63,7 @@ void derivePrivateKey(
         FINALLY
         {
             // clean up the raw private key in memory so we don't leek it in any way after this call
-            os_memset(privateKeyRawBuffer, 0, SIZEOF(privateKeyRawBuffer));
+            explicit_bzero(privateKeyRawBuffer, SIZEOF(privateKeyRawBuffer));
         }
     }
     END_TRY;
@@ -146,12 +146,12 @@ void deriveExtendedPublicKey(
             ASSERT(CHAIN_CODE_SIZE == SIZEOF(chainCode.code));
 
             // chain code is placed after the public key
-            os_memmove(out->chainCode, chainCode.code, CHAIN_CODE_SIZE);
+            memcpy(out->chainCode, chainCode.code, CHAIN_CODE_SIZE);
         }
         FINALLY
         {
             // clear the private key storage so we don't leak it after this call
-            os_memset(&privateKey, 0, SIZEOF(privateKey));
+            explicit_bzero(&privateKey, SIZEOF(privateKey));
         }
     }
     END_TRY;

@@ -22,10 +22,12 @@ include $(BOLOS_SDK)/Makefile.defines
 
 DEFINES_LIB = USE_LIB_ETHEREUM
 APP_LOAD_PARAMS= --curve secp256k1 --path "44'/60'" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
 
 APPVERSION_M=1
 APPVERSION_N=0
-APPVERSION_P=5
+APPVERSION_P=7
 APPVERSION="$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 APPNAME = "Fantom FTM"
 
@@ -107,7 +109,6 @@ endif
 ##############
 CC       := $(CLANGPATH)clang
 
-#CFLAGS   += -O0
 CFLAGS   += -O3 -Os -Wall -Wextra -Wuninitialized
 
 AS     := $(GCCPATH)arm-none-eabi-gcc

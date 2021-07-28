@@ -113,8 +113,8 @@ void ui_displayPrompt(
     ui_prompt_state_t *ctx = promptState;
 
     // copy strings from source to the state structure (including string terminator)
-    os_memmove(ctx->header, headerStr, header_len + 1);
-    os_memmove(ctx->text, bodyStr, text_len + 1);
+    memcpy(ctx->header, headerStr, header_len + 1);
+    memcpy(ctx->text, bodyStr, text_len + 1);
 
     // initialize the callback structure
     ui_CallbackInit(&ctx->callback, confirm, reject);
@@ -124,8 +124,10 @@ void ui_displayPrompt(
 
     // validate the i/o state we are in and set it to waiting for user interaction
     ASSERT(io_state == IO_EXPECT_NONE || io_state == IO_EXPECT_UI);
+    #ifndef FUZZING
     io_state = IO_EXPECT_UI;
-
+    #endif
+    
     // change the UX flow to the configured prompt screen
     ui_doDisplayPrompt();
 }
@@ -151,8 +153,8 @@ void ui_displayPaginatedText(
     ui_paginated_text_state_t *ctx = paginatedTextState;
 
     // copy strings from source to the state structure (including string terminator)
-    os_memmove(ctx->header, headerStr, header_len);
-    os_memmove(ctx->text, bodyStr, body_len);
+    memcpy(ctx->header, headerStr, header_len);
+    memcpy(ctx->text, bodyStr, body_len);
 
     // initialize callback; we don't need rejection callback
     // since user is not deciding anything here
@@ -163,7 +165,9 @@ void ui_displayPaginatedText(
 
     // validate the i/o state we are in and set it to waiting for user interaction
     ASSERT(io_state == IO_EXPECT_NONE || io_state == IO_EXPECT_UI);
+    #ifndef FUZZING
     io_state = IO_EXPECT_UI;
+    #endif
 
     // change the UX flow to configured paginated text
     ui_doDisplayPaginatedText();

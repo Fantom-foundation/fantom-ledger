@@ -27,7 +27,7 @@
 #define MEMCLEAR(ptr, expected_type) \
     do { \
         ASSERT(sizeof(expected_type) == sizeof(*(ptr))); \
-        os_memset(ptr, 0, sizeof(expected_type)); \
+        memset(ptr, 0, sizeof(expected_type)); \
     } while(0)
 
 // Helper macro to check APDU request parameters.

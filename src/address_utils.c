@@ -17,7 +17,7 @@
 #include "address_utils.h"
 
 // HEXDIGITS defines textual glyphs usable for address generation
-static const uint8_t const HEXDIGITS[] = "0123456789abcdef";
+static const uint8_t HEXDIGITS[] = "0123456789abcdef";
 
 // deriveAddress implements address derivation for given BIP44 path.
 size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, size_t outSize) {
@@ -53,7 +53,7 @@ size_t deriveAddress(bip44_path_t *path, cx_sha3_t *sha3Context, uint8_t *out, s
         FINALLY
         {
             // clear the private key storage so we don't leak it after this call
-            os_memset(&privateKey, 0, SIZEOF(privateKey));
+            explicit_bzero(&privateKey, SIZEOF(privateKey));
         }
     }
     END_TRY;
@@ -80,7 +80,7 @@ size_t getRawAddress(cx_ecfp_public_key_t *publicKey, cx_sha3_t *sha3Context, ui
     cx_hash((cx_hash_t *) sha3Context, CX_LAST, publicKey->W + 1, 64, hashAddress, 32);
 
     // move the last 20 bytes of the hash to output buffer
-    os_memmove(out, hashAddress + (ADDRESS_HASH_BUFFER_SIZE - RAW_ADDRESS_SIZE), RAW_ADDRESS_SIZE);
+    memcpy(out, hashAddress + (ADDRESS_HASH_BUFFER_SIZE - RAW_ADDRESS_SIZE), RAW_ADDRESS_SIZE);
     return RAW_ADDRESS_SIZE;
 }
 

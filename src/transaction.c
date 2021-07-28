@@ -26,7 +26,7 @@ uint32_t txGetV(transaction_t *tx) {
     uint32_t v = 0;
 
     // validate the V value length
-    VALIDATE(tx->v.length >= 0 && tx->v.length <= 4, ERR_INVALID_DATA);
+    VALIDATE(tx->v.length <= 4, ERR_INVALID_DATA);
 
     // any V present?
     if (tx->v.length > 0) {
@@ -65,6 +65,7 @@ void txGetSignature(
     // validate hash size
     ASSERT(hashLength == TX_HASH_LENGTH);
 
+    #ifndef FUZZING
     // do the extraction
     BEGIN_TRY
     {
@@ -154,7 +155,7 @@ void txGetSignature(
         {
             // clean up the private key in memory so we don't leek it in any way and shape
             // do we need to do that if we re-throw? let's better be safe than sorry with PKs.
-            os_memset(&privateKey, 0, SIZEOF(privateKey));
+            explicit_bzero(&privateKey, SIZEOF(privateKey));
 
             // re-throw the exception so it's collected in the main loop
             THROW(e);
@@ -162,10 +163,11 @@ void txGetSignature(
         FINALLY
         {
             // clean up the private key in memory so we don't leek it in any way
-            os_memset(&privateKey, 0, SIZEOF(privateKey));
+            explicit_bzero(&privateKey, SIZEOF(privateKey));
         }
     }
     END_TRY;
+    #endif
 }
 
 // adjustDecimals adjust decimal places for the given decimal number.

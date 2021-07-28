@@ -2,6 +2,7 @@
 #define FANTOM_LEDGER_IO_H
 
 #include <os_io_seproxyhal.h>
+#include <ux.h>
 #include <stdint.h>
 
 // The program is always waiting for either APDU i/o, or user input.
@@ -29,7 +30,7 @@ void CHECK_RESPONSE_SIZE(unsigned int tx);
 void _io_send_G_io_apdu_buffer(uint16_t code, uint16_t tx);
 
 // io_send_buf implements sending APDU response from an internal buffer.
-void io_send_buf(uint16_t code, uint8_t *buffer, size_t bufferSize);
+void io_send_buf(uint16_t code, const uint8_t *buffer, size_t bufferSize);
 
 // ----------------------------------------------
 // Everything below this point is Ledger magic.

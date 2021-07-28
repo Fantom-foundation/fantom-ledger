@@ -62,6 +62,10 @@ UX_FLOW(
 
 // ui_doDisplayPaginatedText implements actual change in UX flow to show the configured paginated text.
 void ui_doDisplayPaginatedText() {
+    #ifdef FUZZING
+    ux_flow_init(0, ux_short_text_flow, NULL);
+    ux_stack_push();
+    #else
     // decide by the text length if we can use simple flow, or if we need the paginated one
     if (strlen((const char*) &displayState.paginatedText.text) < MAX_SIMPLE_TEXT_LENGTH ) {
         // initialize the simple flow defined above
@@ -71,6 +75,7 @@ void ui_doDisplayPaginatedText() {
         ux_layout_bnnn_paging_reset();
         ux_flow_init(0, ux_paginated_text_flow, NULL);
     }
+    #endif
 }
 
 // ---------------------------------------------
